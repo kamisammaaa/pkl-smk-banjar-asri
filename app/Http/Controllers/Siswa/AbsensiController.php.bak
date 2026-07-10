@@ -1,0 +1,197 @@
+<?php
+
+namespace App\Http\Controllers\Siswa;
+
+use App\Http\Controllers\Controller;
+use App\Helpers\ImageHelper;
+use App\Models\Absensi;
+use App\Models\EOTag;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+
+class AbsensiController extends Controller
+{
+    /**
+     * Display absensi history for authenticated student
+     */
+    public function index()
+    {
+        $absensis = Absensi::where('siswa_user_id', auth()->id())
+            ->latest()
+            ->paginate(10);
+
+        return view('siswa.absensi.index', compact('absensis'));
+    }
+
+    /**
+     * Store new absensi with auto-compress photo
+     */
+    public function store(Request $request)
+    {
+        // 1. Validasi input
+        $validated = $request->validate([
+            'check_in' => 'required|date_format:H:i',
+            'foto' => 'nullable|image|max:10240|mimes:jpg,jpeg,png', // 10MB max upload
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+        ], [
+            'check_in.required' => 'Waktu check-in wajib diisi.',
+            'check_in.date_format' => 'Format waktu harus HH:MM (24 jam).',
+            'foto.image' => 'File harus berupa gambar.',
+            'foto.max' => 'Ukuran foto terlalu besar. Maksimal 10MB.',
+            'foto.mimes' => 'Format foto harus JPG, JPEG, atau PNG.',
+            'latitude.between' => 'Latitude tidak valid.',
+            'longitude.between' => 'Longitude tidak valid.',
+        ]);
+
+        // 2. Cek apakah sudah absen hari ini
+        $exists = Absensi::where('siswa_user_id', auth()->id())
+            ->whereDate('tanggal', now()->toDateString())
+            ->exists();
+
+        if ($exists) {
+            return back()
+                ->withInput()
+                ->withErrors(['check_in' => 'Anda sudah melakukan absensi hari ini.']);
+        }
+
+        // 3. Ambil IP Address yang benar (dari Cloudflare/Nginx proxy)
+        $ipAddress = $this->getClientIP($request);
+
+        // 4. Proses kompresi foto jika ada
+        $fotoPath = null;
+        if ($request->hasFile('foto')) {
+            try {
+                // Kompres foto ke maksimal 1MB (1048576 bytes)
+                // Resize max 1920x1920, quality auto-adjust 85% â†’ 20%
+                $fotoPath = ImageHelper::compress(
+                    $request->file('foto'),
+                    1048576, // 1MB max
+                    85       // initial quality
+                );
+
+                Log::info('Foto absensi berhasil dikompres', [
+                    'original_size' => $request->file('foto')->getSize(),
+                    'compressed_path' => $fotoPath,
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Gagal kompres foto absensi', [
+                    'error' => $e->getMessage(),
+                    'file_size' => $request->file('foto')->getSize(),
+                ]);
+
+                return back()
+                    ->withInput()
+                    ->withErrors(['foto' => 'Gagal memproses foto. Silakan coba lagi atau gunakan foto dengan ukuran lebih kecil.']);
+            }
+        }
+
+        // 5. Generate E-OTAG token untuk audit
+        $eotagToken = strtoupper(bin2hex(random_bytes(4)));
+
+        // 6. Simpan data absensi
+        $absensi = Absensi::create([
+            'siswa_user_id' => auth()->id(),
+            'tanggal' => now()->toDateString(),
+            'check_in' => $validated['check_in'],
+            'foto' => $fotoPath,
+            'ip_address' => $ipAddress,
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
+            'eotag_token' => $eotagToken,
+            'is_verified' => false, // Menunggu verifikasi pembimbing
+        ]);
+
+        // 7. Simpan audit trail E-OTAG
+        EOTag::create([
+            'siswa_user_id' => auth()->id(),
+            'token' => $eotagToken,
+            'check_in_at' => now(),
+            'ip_address' => $ipAddress,
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
+            'status' => 'valid',
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        // 8. Format pesan sukses
+        $compressInfo = $fotoPath ? '(Foto otomatis dikompres)' : '';
+        $locationInfo = '';
+        if ($validated['latitude'] && $validated['longitude']) {
+            $locationInfo = 'í³ ' . number_format($validated['latitude'], 4) . ', ' . number_format($validated['longitude'], 4);
+        }
+
+        return redirect()
+            ->back()
+            ->with('success', "âœ… Absensi berhasil disimpan!\n" .
+                "íµ Jam: {$validated['check_in']}\n" .
+                "í¼ IP: {$ipAddress}\n" .
+                "í¾« Token: {$eotagToken}\n" .
+                "{$compressInfo}\n" .
+                "{$locationInfo}");
+    }
+
+    /**
+     * Get client IP address considering Cloudflare & Nginx proxies
+     * 
+     * @param Request $request
+     * @return string
+     */
+    private function getClientIP(Request $request)
+    {
+        // Priority headers untuk deteksi IP asli client
+        $headers = [
+            'HTTP_CF_CONNECTING_IP',    // Cloudflare (prioritas #1)
+            'HTTP_X_FORWARDED_FOR',     // Standard proxy header
+            'HTTP_X_REAL_IP',           // Nginx
+            'REMOTE_ADDR',              // Direct connection (fallback)
+        ];
+
+        foreach ($headers as $header) {
+            if (!empty($_SERVER[$header])) {
+                // X-Forwarded-For bisa berisi multiple IP: "client, proxy1, proxy2"
+                // Ambil yang pertama (client asli)
+                $ip = explode(',', $_SERVER[$header])[0];
+                $ip = trim($ip);
+
+                // Validasi IP format (IPv4 atau IPv6)
+                if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                    return $ip;
+                }
+            }
+        }
+
+        // Fallback ke Laravel's ip() method
+        return $request->ip() ?? '0.0.0.0';
+    }
+
+    /**
+     * Show form untuk edit absensi (jika diperlukan)
+     */
+    public function edit($id)
+    {
+        $absensi = Absensi::where('siswa_user_id', auth()->id())
+            ->findOrFail($id);
+
+        return view('siswa.absensi.edit', compact('absensi'));
+    }
+
+    /**
+     * Update absensi (jika diperlukan)
+     */
+    public function update(Request $request, $id)
+    {
+        $absensi = Absensi::where('siswa_user_id', auth()->id())
+            ->findOrFail($id);
+
+        $validated = $request->validate([
+            'check_in' => 'required|date_format:H:i',
+            'keterangan' => 'nullable|string|max:255',
+        ]);
+
+        $absensi->update($validated);
+
+        return redirect()->back()->with('success', 'Absensi berhasil diupdate.');
+    }
+}

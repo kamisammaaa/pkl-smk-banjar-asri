@@ -1,0 +1,23 @@
+@extends('layouts.app')
+@section('content')
+<div class="max-w-2xl mx-auto px-4 py-6">
+    <h2 class="text-2xl font-bold mb-6">➕ Tambah User Baru</h2>
+    <form action="{{ route('admin.users.store') }}" method="POST" class="bg-white p-6 rounded shadow">
+        @csrf
+        <div class="grid gap-4">
+            <div><label class="block text-sm font-medium">Nama</label><input type="text" name="name" required class="mt-1 block w-full border rounded p-2"></div>
+            <div><label class="block text-sm font-medium">Email</label><input type="email" name="email" required class="mt-1 block w-full border rounded p-2"></div>
+            <div><label class="block text-sm font-medium">Password</label><input type="password" name="password" required class="mt-1 block w-full border rounded p-2"></div>
+            <div><label class="block text-sm font-medium">Role</label>
+                <select name="role" required class="mt-1 block w-full border rounded p-2">
+                    <option value="pembimbing">Pembimbing</option><option value="siswa">Siswa</option>
+                </select>
+            </div>
+            <div class="flex gap-2 pt-4">
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Simpan</button>
+                <a href="{{ route('admin.users.index') }}" class="bg-gray-300 px-4 py-2 rounded">Batal</a>
+            </div>
+        </div>
+    </form>
+</div>
+@endsection

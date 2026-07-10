@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak Data Perusahaan PKL</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #666;
+            margin-top: 0;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+
+        th, td {
+            border: 1px solid #333;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f4f4f4;
+            font-weight: bold;
+        }
+
+        .no-print {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .small {
+            font-size: 11px;
+            color: #555;
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+
+            body {
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print">
+        <button onclick="window.print()"
+            style="padding:10px 20px; background:#2563eb; color:white; border:none; border-radius:5px; cursor:pointer;">
+            Ì∂®Ô∏è Cetak / Save PDF
+        </button>
+
+        <button onclick="history.back()"
+            style="padding:10px 20px; background:#6b7280; color:white; border:none; border-radius:5px; cursor:pointer; margin-left:10px;">
+            ‚Üê Kembali
+        </button>
+    </div>
+
+    <h2>DATA PERUSAHAAN PKL SISWA</h2>
+
+    <p class="subtitle">
+        SMK Banjar Asri - Tahun Ajaran {{ date('Y') }}/{{ date('Y') + 1 }}
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th width="5%">No</th>
+                <th width="18%">Nama Siswa</th>
+                <th width="22%">Perusahaan</th>
+                <th width="30%">Pembimbing | Alamat | TTL</th>
+                <th width="15%">No. Telepon</th>
+                <th width="10%">Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @forelse($data as $index => $d)
+            <tr>
+                <td>{{ $index + 1 }}</td>
+
+                <td>
+                    {{ $d->siswa->name }}
+                </td>
+
+                <td>
+                    <strong>{{ $d->nama_perusahaan }}</strong>
+                </td>
+
+                <td>
+                    <strong>{{ $d->nama_pembimbing }}</strong><br>
+
+                    <div class="small">
+                        {{ $d->alamat_pembimbing }}
+                    </div>
+
+                    <div class="small">
+                        {{ $d->ttl_pembimbing }}
+                    </div>
+                </td>
+
+                <td>
+                    {{ $d->no_telp }}
+                </td>
+
+                <td style="text-align:center;">
+                    {{ $d->is_verified ? '‚úÖ' : '‚è≥' }}
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="6" style="text-align:center; padding:20px;">
+                    Tidak ada data
+                </td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+
+    <div style="margin-top:30px; text-align:right; font-size:12px; color:#666;">
+        Dicetak pada:
+        {{ now()->format('d F Y H:i') }} WIB
+    </div>
+
+</body>
+</html>
