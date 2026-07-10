@@ -2,10 +2,19 @@
 @section('page-title', 'Data Perusahaan PKL')
 
 @section('content')
-<div class="max-w-6xl mx-auto space-y-6 px-2 md:px-4">
-    <div class="flex items-center gap-3">
-        <h2 class="text-xl font-black text-gray-800">🏢 Data Perusahaan PKL</h2>
-    </div>
+<div class="min-h-screen py-6 bg-slate-50">
+    <div class="max-w-6xl mx-auto space-y-6 px-2 md:px-4">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-black text-slate-900">🏢 Data Perusahaan PKL</h1>
+                <p class="text-sm text-slate-500 mt-1">Kelola informasi mitra perusahaan dan cek status verifikasi data Anda.</p>
+            </div>
+            @if(isset($data))
+                <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                    Status: {{ $data->is_verified === true ? 'Disetujui' : ($data->is_verified === false ? 'Perlu Perbaikan' : 'Menunggu Verifikasi') }}
+                </span>
+            @endif
+        </div>
 
     @if(session('success'))
         <div class="bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded-xl shadow-sm flex items-start gap-3">

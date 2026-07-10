@@ -1,10 +1,19 @@
 @extends('layouts.app')
 @section('content')
-<div class="max-w-4xl mx-auto px-4 py-6 text-center">
+<div class="min-h-screen py-6 bg-slate-50">
+    <div class="max-w-4xl mx-auto px-4">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+                <h1 class="text-xl font-black text-slate-900">🔑 E-OTAG PKL</h1>
+                <p class="text-sm text-slate-500 mt-1">Buat token kedatangan dan cek riwayat token Anda dengan tampilan yang lebih bersih.</p>
+            </div>
+            <span class="text-xs uppercase tracking-wide text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">Riwayat Terakhir</span>
+        </div>
+
     <h2 class="text-2xl font-bold mb-4">🏷️ E-OTAG PKL</h2>
     @if(session('success')) <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-4 rounded mb-6 text-lg font-mono">{{ session('success') }}</div> @endif
 
-    <div class="bg-white p-8 rounded shadow mb-6">
+    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 mb-6">
         <p class="text-gray-600 mb-4">Generate token untuk verifikasi kedatangan di tempat industri.</p>
         <form action="{{ route('siswa.eotag.checkin') }}" method="POST">
             @csrf
@@ -14,7 +23,7 @@
     </div>
 
     <h3 class="text-lg font-semibold mb-2 text-left">Riwayat Token</h3>
-    <div class="bg-white rounded shadow overflow-x-auto text-left">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-x-auto text-left">
         <table class="w-full">
             <thead class="bg-gray-50"><tr><th class="p-3">Token</th><th class="p-3">Waktu</th><th class="p-3">Status</th><th class="p-3">IP</th></tr></thead>
             <tbody>

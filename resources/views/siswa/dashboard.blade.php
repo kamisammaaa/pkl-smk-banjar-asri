@@ -3,329 +3,252 @@
 
 @push('styles')
 <style>
-    /* ── Dashboard Gradient Background ── */
+    /* ── Dashboard Background ── */
     .dash-bg {
-        background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0fdf4 100%);
+        background: #f8fafc;
         min-height: calc(100vh - 4rem);
     }
 
-    /* ── Hero Welcome Card ── */
-    .hero-card {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%);
-        position: relative;
-        overflow: hidden;
-    }
-    .hero-card::before {
-        content: '';
-        position: absolute;
-        top: -60px; right: -60px;
-        width: 200px; height: 200px;
-        background: rgba(255,255,255,0.08);
-        border-radius: 50%;
-    }
-    .hero-card::after {
-        content: '';
-        position: absolute;
-        bottom: -80px; left: -40px;
-        width: 250px; height: 250px;
-        background: rgba(255,255,255,0.05);
-        border-radius: 50%;
-    }
-
-    /* ── Stat Cards ── */
-    .stat-card {
+    /* ── Card Panels ── */
+    .section-card,
+    .stat-card,
+    .info-chip,
+    .announcement-item,
+    .visit-item {
         background: #ffffff;
-        border-radius: 16px;
-        padding: 1.25rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-        border: 1px solid rgba(226, 232, 240, 0.8);
-        transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-        position: relative;
-        overflow: hidden;
+        border-radius: 24px;
+        border: 1px solid rgba(148, 163, 184, 0.9);
+        box-shadow: 0 16px 45px rgba(15, 23, 42, 0.08);
     }
-    .stat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.04);
-    }
-    .stat-card .accent-bar {
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: 3px;
-        border-radius: 16px 16px 0 0;
-    }
-
-    /* ── Attendance Mini Cards ── */
-    .att-badge {
-        border-radius: 12px;
-        padding: 0.75rem 0.5rem;
-        text-align: center;
-        transition: all 0.2s ease;
-        cursor: default;
-    }
-    .att-badge:hover { transform: scale(1.05); }
-
-    /* ── Section Cards ── */
     .section-card {
-        background: #ffffff;
-        border-radius: 20px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-        border: 1px solid rgba(226, 232, 240, 0.8);
         overflow: hidden;
+        min-height: 16rem;
     }
     .section-header {
         padding: 1rem 1.25rem;
-        border-bottom: 1px solid #f1f5f9;
-        background: linear-gradient(to right, #fafbff, #ffffff);
+        background: #ffffff;
+        border-bottom: 1px solid #eef2ff;
         display: flex;
         align-items: center;
         justify-content: space-between;
     }
 
+    /* ── Stats Card ── */
+    .stat-card {
+        padding: 1.25rem;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+    }
+    .stat-card .accent-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        border-radius: 24px 24px 0 0;
+    }
+
+    /* ── Attendance Badges ── */
+    .att-badge {
+        border-radius: 18px;
+        padding: 1rem 0.75rem;
+        text-align: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid transparent;
+    }
+    .att-badge:hover {
+        transform: translateY(-2px);
+        border-color: rgba(79, 70, 229, 0.16);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
     /* ── Progress Bar ── */
     .progress-bar {
-        height: 6px;
+        height: 8px;
         border-radius: 9999px;
-        background: #e2e8f0;
+        background: #eef2ff;
         overflow: hidden;
-        margin-top: 0.5rem;
+        margin-top: 0.75rem;
     }
     .progress-fill {
         height: 100%;
         border-radius: 9999px;
-        transition: width 1s cubic-bezier(0.4,0,0.2,1);
+        transition: width 0.9s cubic-bezier(0.4,0,0.2,1);
     }
 
-    /* ── Quick Action Buttons ── */
+    /* ── Quick Actions ── */
     .quick-action {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.5rem;
-        padding: 1rem 0.5rem;
-        border-radius: 16px;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 1.1rem 0.75rem;
+        border-radius: 22px;
         text-decoration: none;
-        transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-        border: 1px solid transparent;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        border: 1px solid rgba(226, 232, 240, 0.8);
     }
     .quick-action:hover {
         transform: translateY(-3px);
-        border-color: rgba(79,70,229,0.2);
-        box-shadow: 0 8px 20px -4px rgba(79,70,229,0.15);
+        border-color: rgba(79, 70, 229, 0.2);
+        box-shadow: 0 12px 32px rgba(99, 102, 241, 0.08);
     }
     .quick-action .icon-wrap {
-        width: 3rem; height: 3rem;
-        border-radius: 14px;
-        display: flex; align-items: center; justify-content: center;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-size: 1.25rem;
-        transition: transform 0.2s ease;
     }
-    .quick-action:hover .icon-wrap { transform: scale(1.1) rotate(-5deg); }
     .quick-action span:last-child {
-        font-size: 0.68rem;
+        font-size: 0.72rem;
         font-weight: 700;
         color: #475569;
         text-align: center;
-        line-height: 1.2;
+        line-height: 1.3;
     }
 
-    /* ── Announcement Items ── */
-    .announcement-item {
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid #f8fafc;
-        transition: background 0.2s ease;
-        display: flex;
-        gap: 0.875rem;
-        align-items: flex-start;
-    }
-    .announcement-item:last-child { border-bottom: none; }
-    .announcement-item:hover { background: #fafbff; }
-
-    /* ── Visit Timeline ── */
+    /* ── Announcement + Visit items ── */
+    .announcement-item,
     .visit-item {
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid #f8fafc;
-        display: flex;
-        gap: 0.875rem;
-        align-items: flex-start;
+        padding: 0.95rem 1rem;
+        border-bottom: 1px solid #f1f5f9;
         transition: background 0.2s ease;
     }
-    .visit-item:last-child { border-bottom: none; }
-    .visit-item:hover { background: #fafbff; }
+    .announcement-item:last-child,
+    .visit-item:last-child {
+        border-bottom: none;
+    }
+    .announcement-item:hover,
+    .visit-item:hover {
+        background: #f8fafc;
+    }
+
+    .announcement-item p,
+    .visit-item p {
+        color: #475569;
+    }
 
     /* ── Info Chips ── */
     .info-chip {
-        display: flex;
-        align-items: center;
-        gap: 0.625rem;
-        padding: 0.875rem 1rem;
-        background: #ffffff;
-        border-radius: 14px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        transition: all 0.2s ease;
-    }
-    .info-chip:hover {
-        border-color: #c7d2fe;
-        box-shadow: 0 4px 12px -2px rgba(79,70,229,0.1);
+        border-radius: 18px;
+        padding: 0.95rem 1rem;
+        gap: 0.85rem;
     }
 
     /* ── Status Badge ── */
     .status-badge {
         display: inline-flex;
         align-items: center;
-        gap: 0.25rem;
-        padding: 0.2rem 0.6rem;
+        gap: 0.35rem;
+        padding: 0.28rem 0.75rem;
         border-radius: 9999px;
         font-size: 0.65rem;
         font-weight: 700;
-        letter-spacing: 0.025em;
+        letter-spacing: 0.02em;
     }
 
-    /* ── Pulse dot animation ── */
-    .pulse-dot {
-        width: 8px; height: 8px;
-        border-radius: 50%;
-        animation: pulse-anim 2s ease-in-out infinite;
-    }
-    @keyframes pulse-anim {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.5; transform: scale(0.85); }
-    }
-
-    /* ── Fade-in animation ── */
+    /* ── Animation ── */
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(16px); }
+        from { opacity: 0; transform: translateY(14px); }
         to   { opacity: 1; transform: translateY(0); }
     }
-    .fade-in   { animation: fadeInUp 0.4s ease both; }
+    .fade-in   { animation: fadeInUp 0.35s ease both; }
     .fade-in-1 { animation-delay: 0.05s; }
     .fade-in-2 { animation-delay: 0.1s; }
     .fade-in-3 { animation-delay: 0.15s; }
     .fade-in-4 { animation-delay: 0.2s; }
     .fade-in-5 { animation-delay: 0.25s; }
 
-    /* ── Modal ── */
     .modal-backdrop {
-        background: rgba(15, 23, 42, 0.6);
+        background: rgba(15, 23, 42, 0.55);
         backdrop-filter: blur(6px);
     }
 </style>
 @endpush
 
 @section('content')
-<div class="max-w-6xl mx-auto space-y-6 px-2 md:px-4 pb-6">
+<div class="dash-bg min-h-screen py-6">
+    <div class="max-w-6xl mx-auto space-y-6 px-2 md:px-4 pb-6">
 
     {{-- HERO WELCOME CARD --}}
-    <div class="hero-card rounded-2xl p-5 text-white shadow-lg fade-in fade-in-1">
-        <div class="relative z-10">
-            <div class="flex items-start gap-4">
-                <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl font-black shadow-inner border border-white/30 flex-shrink-0">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 fade-in fade-in-1">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div class="min-w-0">
+                <p class="text-xs uppercase tracking-[0.24em] text-slate-500">Selamat Datang</p>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 truncate">{{ $infoSiswa['nama'] }}</h1>
+                <p class="mt-2 text-sm text-slate-600 max-w-2xl">
+                    Ringkasan aktivitas PKL kamu di <strong>{{ $infoSiswa['perusahaan'] }}</strong> - {{ $infoSiswa['jurusan'] }}.
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xl font-black text-slate-800">
                     {{ strtoupper(substr($infoSiswa['nama'], 0, 1)) }}
                 </div>
-                <div class="min-w-0 flex-1">
-                    <p class="text-white/70 text-xs font-semibold uppercase tracking-widest">Selamat Datang</p>
-                    <h2 class="text-lg font-black text-white leading-tight truncate">{{ $infoSiswa['nama'] }}</h2>
-                    <p class="text-white/60 text-xs mt-0.5 flex items-center gap-1.5">
-                        <span>{{ $infoSiswa['jurusan'] }}</span>
-                        @if($infoSiswa['nis'] !== '-')
-                            <span class="w-1 h-1 rounded-full bg-white/40 inline-block"></span>
-                            <span>NIS: {{ $infoSiswa['nis'] }}</span>
-                        @endif
-                    </p>
-                </div>
-                <div class="flex items-center gap-1.5 bg-white/15 rounded-full px-2.5 py-1 border border-white/20 flex-shrink-0">
-                    <div class="pulse-dot" style="background:#86efac;"></div>
-                    <span class="text-[10px] font-bold text-white/90">Aktif</span>
+                <div class="rounded-full bg-emerald-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-700 border border-emerald-100">
+                    Aktif
                 </div>
             </div>
+        </div>
 
-            <div class="my-4 border-t border-white/15"></div>
-
-            <div class="flex flex-wrap gap-2">
-                <a href="{{ route('siswa.absensi.index') }}"
-                   class="flex items-center gap-2 bg-white text-indigo-700 px-4 py-2 rounded-xl text-sm font-bold hover:bg-indigo-50 transition active:scale-95 shadow-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                    Absensi Sekarang
-                </a>
-                <a href="{{ route('siswa.jurnal.index') }}"
-                   class="flex items-center gap-2 bg-white/15 text-white border border-white/30 px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/25 transition active:scale-95">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
-                    Tulis Jurnal
-                </a>
-            </div>
-
-            <p class="mt-3 text-white/50 text-[11px] font-medium">
-                📅 {{ now()->locale('id')->isoFormat('dddd, D MMMM Y') }}
-            </p>
+        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <a href="{{ route('siswa.absensi.index') }}" class="bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition flex items-center gap-3">
+                <div class="h-12 w-12 rounded-2xl bg-indigo-100 flex items-center justify-center text-xl">📅</div>
+                <div>
+                    <p class="text-xs text-slate-500 uppercase tracking-[0.16em]">Absensi</p>
+                    <p class="text-xl font-black text-slate-900">Lihat</p>
+                </div>
+            </a>
+            <a href="{{ route('siswa.jurnal.index') }}" class="bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition flex items-center gap-3">
+                <div class="h-12 w-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-xl">📖</div>
+                <div>
+                    <p class="text-xs text-slate-500 uppercase tracking-[0.16em]">Jurnal</p>
+                    <p class="text-xl font-black text-slate-900">Tulis</p>
+                </div>
+            </a>
+            <a href="{{ route('siswa.perusahaan') }}" class="bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition flex items-center gap-3">
+                <div class="h-12 w-12 rounded-2xl bg-blue-100 flex items-center justify-center text-xl">🏢</div>
+                <div>
+                    <p class="text-xs text-slate-500 uppercase tracking-[0.16em]">Data Mitra</p>
+                    <p class="text-xl font-black text-slate-900">Cek</p>
+                </div>
+            </a>
+ 
         </div>
     </div>
 
-    {{-- INFO CHIPS --}}
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 fade-in fade-in-2">
-        <div class="info-chip">
-            <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
-                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                </svg>
+    {{-- INFO CARDS --}}
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-5 fade-in fade-in-2">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="section-card p-4 flex items-start gap-4">
+                <div class="w-11 h-11 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 text-xl">🏢</div>
+                <div class="min-w-0">
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Perusahaan</p>
+                    <p class="text-sm font-black text-slate-900 truncate">{{ $infoSiswa['perusahaan'] }}</p>
+                </div>
             </div>
-            <div class="min-w-0">
-                <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Perusahaan</p>
-                <p class="text-sm font-bold text-slate-800 truncate">{{ $infoSiswa['perusahaan'] }}</p>
+            <div class="section-card p-4 flex items-start gap-4">
+                <div class="w-11 h-11 rounded-2xl bg-violet-50 flex items-center justify-center text-violet-600 text-xl">👤</div>
+                <div class="min-w-0">
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Pembimbing</p>
+                    <p class="text-sm font-black text-slate-900 truncate">{{ $infoSiswa['pembimbing'] !== '-' ? $infoSiswa['pembimbing'] : 'Belum ditentukan' }}</p>
+                </div>
             </div>
-        </div>
-        <div class="info-chip">
-            <div class="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center flex-shrink-0">
-                <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
+            <div class="section-card p-4 flex items-start gap-4">
+                <div class="w-11 h-11 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 text-xl">🗓️</div>
+                <div class="min-w-0">
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Periode PKL</p>
+                    <p class="text-sm font-black text-slate-900">{{ now()->locale('id')->isoFormat('MMMM Y') }}</p>
+                </div>
             </div>
-            <div class="min-w-0">
-                <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Pembimbing</p>
-                <p class="text-sm font-bold text-slate-800 truncate">{{ $infoSiswa['pembimbing'] !== '-' ? $infoSiswa['pembimbing'] : 'Belum ditentukan' }}</p>
-            </div>
-        </div>
-        <div class="info-chip">
-            <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            <div class="min-w-0">
-                <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Periode PKL</p>
-                <p class="text-sm font-bold text-slate-800">{{ now()->locale('id')->isoFormat('MMMM Y') }}</p>
-            </div>
-        </div>
-    </div>
-
-    {{-- QUICK ACTIONS --}}
-    <div class="section-card fade-in fade-in-2">
-        <div class="section-header">
-            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                <span class="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center text-xs">⚡</span>
-                Aksi Cepat
-            </h3>
-        </div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
-            <a href="{{ route('siswa.absensi.index') }}" class="quick-action bg-indigo-50/50">
-                <div class="icon-wrap bg-indigo-100">📅</div>
-                <span>Absensi</span>
-            </a>
-            <a href="{{ route('siswa.jurnal.index') }}" class="quick-action bg-emerald-50/50">
-                <div class="icon-wrap bg-emerald-100">📖</div>
-                <span>Jurnal Harian</span>
-            </a>
-            <a href="{{ route('siswa.perusahaan') }}" class="quick-action bg-blue-50/50">
-                <div class="icon-wrap bg-blue-100">🏢</div>
-                <span>Data Mitra</span>
-            </a>
-            <a href="{{ route('profile.edit') }}" class="quick-action bg-violet-50/50">
-                <div class="icon-wrap bg-violet-100">👤</div>
-                <span>Profil Saya</span>
-            </a>
         </div>
     </div>
 
@@ -336,8 +259,8 @@
             $totalAbsensi = max(1, $statsAbsensi['hadir'] + $statsAbsensi['terlambat'] + $statsAbsensi['izin'] + $statsAbsensi['sakit'] + $statsAbsensi['alpha']);
             $hadirPct = round(($statsAbsensi['hadir'] / $totalAbsensi) * 100);
         @endphp
-        <div class="section-card flex flex-col justify-between">
-            <div class="section-header">
+        <div class="section-card bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between min-h-[360px]">
+            <div class="section-header rounded-t-3xl">
                 <div class="flex items-center gap-2">
                     <span class="w-6 h-6 rounded-lg bg-green-100 flex items-center justify-center text-xs">📊</span>
                     <h3 class="font-bold text-slate-800 text-sm">Statistik Absensi</h3>
@@ -394,8 +317,8 @@
             $totalJurnal = max(1, $statsJurnal['disetujui'] + $statsJurnal['menunggu'] + $statsJurnal['revisi']);
             $disetujuiPct = round(($statsJurnal['disetujui'] / $totalJurnal) * 100);
         @endphp
-        <div class="section-card flex flex-col justify-between">
-            <div class="section-header">
+        <div class="section-card bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between min-h-[360px]">
+            <div class="section-header rounded-t-3xl">
                 <div class="flex items-center gap-2">
                     <span class="w-6 h-6 rounded-lg bg-violet-100 flex items-center justify-center text-xs">📖</span>
                     <h3 class="font-bold text-slate-800 text-sm">Statistik Jurnal</h3>
@@ -446,18 +369,14 @@
                 </div>
             </div>
         </div>
-    </div>ap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-                </a>
-            </div>
-        </div>
     </div>
 
     {{-- GRID: PENGUMUMAN + KUNJUNGAN --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         {{-- PENGUMUMAN --}}
-        <div class="section-card fade-in fade-in-4">
-            <div class="section-header">
+        <div class="section-card fade-in fade-in-4 bg-white rounded-3xl border border-slate-200 shadow-sm min-h-[320px]">
+            <div class="section-header rounded-t-3xl">
                 <div class="flex items-center gap-2">
                     <span class="w-6 h-6 rounded-lg bg-sky-100 flex items-center justify-center text-xs">📢</span>
                     <h3 class="font-bold text-slate-800 text-sm">Pengumuman</h3>
@@ -467,40 +386,44 @@
                 @endif
             </div>
 
-            <div class="divide-y divide-slate-50 max-h-72 overflow-y-auto">
-                @forelse($pengumuman as $p)
-                <div class="announcement-item">
-                    <div class="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-sm flex-shrink-0 mt-0.5">📣</div>
-                    <div class="flex-1 min-w-0">
-                        <h4 class="font-bold text-slate-800 text-sm leading-snug" style="word-break:break-word;">{{ $p->judul }}</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5">
-                            {{ $p->published_at?->format('d/m/Y') }} · {{ $p->admin->name }}
-                            @if($p->target !== 'semua')
-                                <span class="status-badge bg-purple-100 text-purple-700 ml-1">{{ ucfirst($p->target) }}</span>
-                            @endif
-                        </p>
-                        <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">{{ Str::limit(strip_tags($p->isi), 120) }}</p>
-                        <button type="button"
-                                onclick="openAnnouncementModal({{ json_encode(['judul' => $p->judul, 'isi' => nl2br(e($p->isi)), 'tanggal' => $p->published_at?->format('d/m/Y H:i'), 'admin' => $p->admin->name, 'target' => ucfirst($p->target)]) }})"
-                                class="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold mt-1.5 flex items-center gap-1 transition">
-                            Baca selengkapnya
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-                        </button>
+            <div class="p-4">
+                <div class="divide-y divide-slate-50 max-h-72 overflow-y-auto">
+                    @forelse($pengumuman as $p)
+                    <div class="announcement-item py-4 flex items-start gap-4">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-sm flex-shrink-0 mt-0.5">📣</div>
+                        <div class="flex-1 min-w-0 space-y-2">
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm leading-snug" style="word-break:break-word;">{{ $p->judul }}</h4>
+                                <p class="text-[11px] text-slate-400 mt-1">
+                                    {{ $p->published_at?->format('d/m/Y') }} · {{ $p->admin->name }}
+                                    @if($p->target !== 'semua')
+                                        <span class="status-badge bg-purple-100 text-purple-700 ml-1">{{ ucfirst($p->target) }}</span>
+                                    @endif
+                                </p>
+                            </div>
+                            <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">{{ Str::limit(strip_tags($p->isi), 120) }}</p>
+                            <button type="button"
+                                    onclick="openAnnouncementModal({{ json_encode(['judul' => $p->judul, 'isi' => nl2br(e($p->isi)), 'tanggal' => $p->published_at?->format('d/m/Y H:i'), 'admin' => $p->admin->name, 'target' => ucfirst($p->target)]) }})"
+                                    class="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 transition">
+                                Baca selengkapnya
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                        </div>
                     </div>
+                    @empty
+                    <div class="flex flex-col items-center justify-center py-10 text-slate-400">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl mb-3">📭</div>
+                        <p class="text-sm font-semibold text-slate-500">Belum ada pengumuman</p>
+                        <p class="text-xs text-slate-400 mt-1">Pengumuman dari admin akan muncul di sini</p>
+                    </div>
+                    @endforelse
                 </div>
-                @empty
-                <div class="flex flex-col items-center justify-center py-10 text-slate-400">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl mb-3">📭</div>
-                    <p class="text-sm font-semibold text-slate-500">Belum ada pengumuman</p>
-                    <p class="text-xs text-slate-400 mt-1">Pengumuman dari admin akan muncul di sini</p>
-                </div>
-                @endforelse
             </div>
         </div>
 
         {{-- JADWAL KUNJUNGAN --}}
-        <div class="section-card fade-in fade-in-5">
-            <div class="section-header">
+        <div class="section-card fade-in fade-in-5 bg-white rounded-3xl border border-slate-200 shadow-sm min-h-[320px]">
+            <div class="section-header rounded-t-3xl">
                 <div class="flex items-center gap-2">
                     <span class="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center text-xs">🏫</span>
                     <h3 class="font-bold text-slate-800 text-sm">Jadwal Kunjungan</h3>
@@ -513,34 +436,35 @@
                 @endif
             </div>
 
-            @if($kunjunganMendatang)
-            <div class="m-3 p-3.5 bg-gradient-to-br from-indigo-50 to-violet-50 rounded-xl border border-indigo-100">
-                <div class="flex items-start gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center text-base flex-shrink-0">📅</div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-[10px] text-indigo-500 font-bold uppercase tracking-wider">Kunjungan Berikutnya</p>
-                        <p class="font-black text-indigo-800 text-sm mt-0.5">{{ $kunjunganMendatang->tanggal->format('d/m/Y') }}</p>
-                        <p class="text-xs text-indigo-600 mt-0.5 flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                            {{ $kunjunganMendatang->pembimbing?->name ?? '-' }}
-                        </p>
-                        @if($kunjunganMendatang->catatan_rencana)
-                            <p class="text-[11px] text-indigo-700 mt-2 bg-white/60 p-2 rounded-lg">
-                                <span class="font-bold">Catatan:</span> {{ $kunjunganMendatang->catatan_rencana }}
+            <div class="p-4 space-y-4">
+                @if($kunjunganMendatang)
+                <div class="bg-gradient-to-br from-indigo-50 to-violet-50 rounded-3xl border border-indigo-100 p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-100 flex items-center justify-center text-base flex-shrink-0">📅</div>
+                        <div class="flex-1 min-w-0 space-y-2">
+                            <p class="text-[10px] text-indigo-500 font-bold uppercase tracking-wider">Kunjungan Berikutnya</p>
+                            <p class="font-black text-indigo-800 text-sm">{{ $kunjunganMendatang->tanggal->format('d/m/Y') }}</p>
+                            <p class="text-xs text-indigo-600 flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                {{ $kunjunganMendatang->pembimbing?->name ?? '-' }}
                             </p>
-                        @endif
+                            @if($kunjunganMendatang->catatan_rencana)
+                                <p class="text-[11px] text-indigo-700 mt-2 bg-white/70 p-3 rounded-2xl">
+                                    <span class="font-bold">Catatan:</span> {{ $kunjunganMendatang->catatan_rencana }}
+                                </p>
+                            @endif
+                        </div>
                     </div>
                 </div>
-            </div>
-            @endif
+                @endif
 
-            <div class="divide-y divide-slate-50 max-h-64 overflow-y-auto">
-                @forelse($semuaKunjungan as $k)
-                <div class="visit-item">
-                    <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm flex-shrink-0 mt-0.5 {{ $k->status === 'rencana' ? 'bg-blue-100' : 'bg-green-100' }}">
-                        {{ $k->status === 'rencana' ? '🔜' : '✅' }}
-                    </div>
-                    <div class="flex-1 min-w-0">
+                <div class="divide-y divide-slate-50 max-h-64 overflow-y-auto">
+                    @forelse($semuaKunjungan as $k)
+                    <div class="visit-item py-4 flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm flex-shrink-0 mt-0.5 {{ $k->status === 'rencana' ? 'bg-blue-100' : 'bg-green-100' }}">
+                            {{ $k->status === 'rencana' ? '🔜' : '✅' }}
+                        </div>
+                        <div class="flex-1 min-w-0 space-y-1">
                         <div class="flex items-center gap-2">
                             <h4 class="font-bold text-slate-800 text-sm">{{ $k->tanggal->format('d/m/Y') }}</h4>
                             @if($k->status === 'rencana')
@@ -569,6 +493,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 @endsection
 

@@ -1,7 +1,8 @@
 @extends('layouts.app')
 @section('page-title', 'Edit Jurnal')
 @section('content')
-<div class="max-w-2xl mx-auto space-y-6">
+<div class="min-h-screen py-6 bg-slate-50">
+    <div class="max-w-2xl mx-auto space-y-6">
 
     {{-- Back Button --}}
     <div>

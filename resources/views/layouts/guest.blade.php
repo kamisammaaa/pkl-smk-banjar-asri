@@ -8,10 +8,11 @@
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- Favicon Pack -->
-        <link rel="apple-touch-icon" sizes="180x180" href="/logo.png">
-        <link rel="icon" type="image/png" sizes="32x32" href="/logo.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/logo.png">
-        <link rel="manifest" href="/site.webmanifest">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('logo.png') }}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('logo.png') }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('logo.png') }}">
+        <link rel="shortcut icon" href="{{ asset('logo.png') }}">
+        <link rel="manifest" href="{{ asset('site.webmanifest') }}">
         <meta name="theme-color" content="#4f46e5">
 
         <!-- Fonts -->
@@ -25,7 +26,7 @@
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
             <div class="hover-lift">
                 <a href="/" class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-white shadow-md border border-slate-100 p-2">
-                    <img src="/logo.png" alt="Logo" class="w-full h-full object-contain">
+                    <img src="{{ asset('logo.png') }}" alt="Logo" class="w-full h-full object-contain">
                 </a>
             </div>
 

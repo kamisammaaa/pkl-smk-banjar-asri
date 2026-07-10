@@ -2,7 +2,8 @@
 @section('page-title', 'Tambah Absensi Harian')
 
 @section('content')
-<div class="w-full max-w-2xl mx-auto space-y-6 px-2">
+<div class="min-h-screen py-6 bg-slate-50">
+    <div class="w-full max-w-2xl mx-auto space-y-6 px-2">
     
     {{-- Back Button & Title --}}
     <div class="flex items-center justify-between">

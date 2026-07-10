@@ -7,10 +7,11 @@
     <title>@yield('page-title', 'Dashboard') - {{ config('app.name', 'PKL SMK Banjar Asri') }}</title>
     
     <!-- Favicon Pack -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/logo.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/logo.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/logo.png">
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('logo.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('logo.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('logo.png') }}">
+    <link rel="shortcut icon" href="{{ asset('logo.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     <meta name="theme-color" content="#4f46e5">
     
     <!-- Fonts -->
@@ -53,7 +54,7 @@
             
             <!-- Logo Area -->
             <div class="h-16 flex items-center justify-start px-6 border-b border-slate-800 flex-shrink-0 gap-3">
-                <img src="/logo.png" alt="Logo" class="w-8 h-8 rounded-lg shadow-md bg-white p-0.5">
+                <img src="{{ asset('logo.png') }}" alt="Logo" class="w-8 h-8 rounded-lg shadow-md bg-white p-0.5">
                 <div class="truncate">
                     <h1 class="text-sm font-bold tracking-wide text-white leading-tight">
                         @if(auth()->check())

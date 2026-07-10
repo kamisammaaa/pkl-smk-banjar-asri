@@ -17,7 +17,7 @@ class AbsensiController extends Controller
     {
         $absensis = Absensi::where('siswa_user_id', auth()->id())
             ->latest('tanggal')
-            ->paginate(15);
+            ->paginate(10);
 
         // Informasi periode PKL untuk ditampilkan di view
         $user      = Auth::user();
