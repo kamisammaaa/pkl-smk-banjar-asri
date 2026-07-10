@@ -20,12 +20,14 @@
         border: 1px solid rgba(148, 163, 184, 0.9);
         box-shadow: 0 16px 45px rgba(15, 23, 42, 0.08);
     }
+    /* Provide consistent inner spacing so card content doesn't touch rounded corners */
     .section-card {
         overflow: hidden;
         min-height: 16rem;
+        padding: 0.9rem;
     }
     .section-header {
-        padding: 1rem 1.25rem;
+        padding: 1rem 1rem;
         background: #ffffff;
         border-bottom: 1px solid #eef2ff;
         display: flex;
@@ -119,7 +121,7 @@
     /* ── Announcement + Visit items ── */
     .announcement-item,
     .visit-item {
-        padding: 0.95rem 1rem;
+        padding: 1rem 1rem;
         border-bottom: 1px solid #f1f5f9;
         transition: background 0.2s ease;
     }
@@ -269,7 +271,7 @@
                     {{ now()->locale('id')->isoFormat('MMMM Y') }}
                 </span>
             </div>
-            <div class="p-4 space-y-4 flex-1 flex flex-col justify-between">
+            <div class="p-5 space-y-5 flex-1 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between text-xs mb-1">
                         <span class="font-semibold text-slate-600">Tingkat Kehadiran</span>
@@ -280,7 +282,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-5 gap-2 pt-1">
+                <div class="grid grid-cols-5 gap-3 pt-3">
                     <div class="att-badge bg-emerald-50 border border-emerald-100">
                         <div class="text-xl font-black text-emerald-600">{{ $statsAbsensi['hadir'] }}</div>
                         <div class="text-[9px] text-emerald-700 font-bold mt-0.5">Hadir</div>
@@ -327,8 +329,8 @@
                     {{ now()->locale('id')->isoFormat('MMMM Y') }}
                 </span>
             </div>
-            <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
-                <div class="grid grid-cols-3 gap-3">
+            <div class="p-5 space-y-5 flex-1 flex flex-col justify-between">
+                <div class="grid grid-cols-3 gap-4">
                     <div class="stat-card text-center">
                         <div class="accent-bar bg-gradient-to-r from-emerald-400 to-green-500"></div>
                         <div class="text-3xl font-black text-emerald-600 mt-1">{{ $statsJurnal['disetujui'] }}</div>
@@ -386,7 +388,7 @@
                 @endif
             </div>
 
-            <div class="p-4">
+            <div class="p-5">
                 <div class="divide-y divide-slate-50 max-h-72 overflow-y-auto">
                     @forelse($pengumuman as $p)
                     <div class="announcement-item py-4 flex items-start gap-4">
@@ -436,9 +438,9 @@
                 @endif
             </div>
 
-            <div class="p-4 space-y-4">
+            <div class="p-5 space-y-5">
                 @if($kunjunganMendatang)
-                <div class="bg-gradient-to-br from-indigo-50 to-violet-50 rounded-3xl border border-indigo-100 p-4">
+                <div class="bg-gradient-to-br from-indigo-50 to-violet-50 rounded-3xl border border-indigo-100 p-5">
                     <div class="flex items-start gap-3">
                         <div class="w-10 h-10 rounded-2xl bg-indigo-100 flex items-center justify-center text-base flex-shrink-0">📅</div>
                         <div class="flex-1 min-w-0 space-y-2">
