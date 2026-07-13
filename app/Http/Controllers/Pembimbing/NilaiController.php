@@ -6,12 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\PenilaianAkhir;
 use App\Models\SiswaProfile;
 use App\Models\User;
+use App\Services\PenilaianService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class NilaiController extends Controller
 {
+    public function __construct(private readonly PenilaianService $penilaianService)
+    {
+    }
+
     /**
      * Display list of students for grading
      */
@@ -80,16 +85,16 @@ class NilaiController extends Controller
         $totalDays = $absensis->count();
 
         // Formula: (hadirOnTime*100 + hadirLate*70 + (sakit + izin)*100 + alpha*0) / totalDays
-        $nilaiAbsensi = $totalDays > 0 
-            ? round((($hadirOnTime * 100) + ($hadirLate * 70) + (($sakit + $izin) * 100)) / $totalDays) 
-            : 100;
+        $nilaiAbsensi = $totalDays > 0
+            ? round((($hadirOnTime * 100) + ($hadirLate * 70) + (($sakit + $izin) * 100)) / $totalDays)
+            : 0;
             
         // Cap nilai maksimal di 100
         $nilaiAbsensi = min(max($nilaiAbsensi, 0), 100);
 
-        // 5. 📚 Hitung Nilai Jurnal (Rata-rata jurnal disetujui)
+        // 5. 📚 Hitung Nilai Jurnal (berdasarkan hari aktif)
         $jurnalDisetujui = $siswa->jurnals->where('status', 'disetujui');
-        $nilaiJurnal = $jurnalDisetujui->avg('nilai') ?? 80; // Default 80 jika kosong
+        $nilaiJurnal = $this->penilaianService->calculateNilaiJurnal($jurnalDisetujui, max($totalWorkingDays, 1));
 
         // 6. 🎯 Ambil Data Penilaian Terakhir (jika ada)
         $penilaian = PenilaianAkhir::where('siswa_user_id', $siswa->id)
@@ -129,12 +134,12 @@ class NilaiController extends Controller
         ]);
 
         // Ambil nilai terhitung dari hidden inputs
-        $nilaiAbsensi = (int) $request->input('nilai_absensi', 80);
-        $nilaiJurnal = (int) $request->input('nilai_jurnal', 80);
+        $nilaiAbsensi = (int) $request->input('nilai_absensi', 0);
+        $nilaiJurnal = (int) $request->input('nilai_jurnal', 0);
         $nilaiSikap = (int) $validated['nilai_sikap'];
         
         // Rumus Final: 30% Absensi + 40% Jurnal + 30% Sikap
-        $nilaiAkhir = round((0.3 * $nilaiAbsensi) + (0.4 * $nilaiJurnal) + (0.3 * $nilaiSikap));
+        $nilaiAkhir = $this->penilaianService->calculateNilaiAkhir($nilaiAbsensi, $nilaiJurnal, $nilaiSikap);
 
         PenilaianAkhir::updateOrCreate(
             ['siswa_user_id' => $siswa->id, 'pembimbing_id' => Auth::id()],

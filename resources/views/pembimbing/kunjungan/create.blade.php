@@ -72,14 +72,25 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Foto Dokumentasi Kunjungan</label>
-                    <input type="file" name="foto" accept="image/*" class="w-full border rounded-lg px-3 py-2 text-sm bg-white">
-                    <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG (Max 2MB)</p>
+                    <x-upload-foto
+                        name="foto"
+                        id="kunjungan_foto_input"
+                        accept="image/*"
+                        :required="false"
+                        :max-mb="20"
+                        btn-color="blue"
+                        hint="📸 Upload foto dokumentasi kunjungan. Akan dikompres otomatis. Format: JPG, PNG."
+                    />
                 </div>
             </div>
 
             <div class="flex justify-end gap-3 pt-4 border-t">
                 <a href="{{ route('pembimbing.kunjungan') }}" class="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">Batal</a>
-                <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition">💾 Simpan Kunjungan</button>
+                <button type="submit" id="kunjungan_create_submit" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition flex items-center gap-2">
+                    <span id="kunjungan_create_icon">💾</span>
+                    <span id="kunjungan_create_text">Simpan Kunjungan</span>
+                    <span id="kunjungan_create_spinner" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                </button>
             </div>
         </form>
     </div>
@@ -109,6 +120,22 @@
 
         statusSelect.addEventListener('change', toggleFields);
         toggleFields(); // Jalankan saat load pertama kali
+
+        // Upload progress
+        const form      = document.querySelector('form[action="{{ route('pembimbing.kunjungan.store') }}"]');
+        const submitBtn = document.getElementById('kunjungan_create_submit');
+        if (form && submitBtn) {
+            attachUploadProgress(form, ['kunjungan_foto_input'], submitBtn);
+            form.addEventListener('submit', function () {
+                const hasFile = document.getElementById('kunjungan_foto_input')?.files?.length > 0;
+                if (!hasFile) {
+                    submitBtn.disabled = true;
+                    document.getElementById('kunjungan_create_text').textContent  = 'Menyimpan...';
+                    document.getElementById('kunjungan_create_spinner').classList.remove('hidden');
+                    document.getElementById('kunjungan_create_icon').classList.add('hidden');
+                }
+            });
+        }
     });
 </script>
 @endsection

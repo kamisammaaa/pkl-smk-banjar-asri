@@ -7,10 +7,15 @@ use App\Models\PenilaianAkhir;
 use App\Models\User;
 use App\Models\Absensi;
 use App\Models\Jurnal;
+use App\Services\PenilaianService;
 use Illuminate\Http\Request;
 
 class PenilaianController extends Controller
 {
+    public function __construct(private readonly PenilaianService $penilaianService)
+    {
+    }
+
     /**
      * Form penilaian akhir untuk satu siswa
      */
@@ -35,16 +40,17 @@ class PenilaianController extends Controller
         $total = $absensi->count();
         
         // Formula: (hadir*100 + terlambat*70 + (izin+sakit)*100 + alpha*0) / total
-        $nilaiAbsensi = $total > 0 
-            ? round((($hadir * 100) + ($terlambat * 70) + (($izin + $sakit) * 100)) / $total) 
-            : 100;
+        $nilaiAbsensi = $total > 0
+            ? round((($hadir * 100) + ($terlambat * 70) + (($izin + $sakit) * 100)) / $total)
+            : 0;
 
         // Hitung rata-rata nilai jurnal yang disetujui
         $jurnalDisetujui = Jurnal::where('siswa_user_id', $siswa->id)
             ->where('status', 'disetujui')
             ->get();
-            
-        $rataJurnal = $jurnalDisetujui->avg('nilai') ?? 80; // Default 80 jika belum ada nilai
+
+        $hariAktif = max($absensi->count(), 1);
+        $rataJurnal = $this->penilaianService->calculateNilaiJurnal($jurnalDisetujui, $hariAktif);
 
         // Cek apakah sudah pernah dinilai
         $penilaian = PenilaianAkhir::where('siswa_user_id', $siswa->id)
@@ -74,12 +80,12 @@ class PenilaianController extends Controller
         ]);
 
         // Ambil nilai komponen
-        $nilaiAbsensi = (int) $request->input('nilai_absensi', 80);
-        $nilaiJurnal = (int) $request->input('nilai_jurnal', 80);
+        $nilaiAbsensi = (int) $request->input('nilai_absensi', 0);
+        $nilaiJurnal = (int) $request->input('nilai_jurnal', 0);
         $nilaiSikap = (int) $validated['nilai_sikap'];
         
         // Hitung nilai akhir: 30% + 40% + 30%
-        $nilaiAkhir = round((0.3 * $nilaiAbsensi) + (0.4 * $nilaiJurnal) + (0.3 * $nilaiSikap));
+        $nilaiAkhir = $this->penilaianService->calculateNilaiAkhir($nilaiAbsensi, $nilaiJurnal, $nilaiSikap);
 
         PenilaianAkhir::updateOrCreate(
             ['siswa_user_id' => $siswa->id, 'pembimbing_id' => auth()->id()],
@@ -94,15 +100,6 @@ class PenilaianController extends Controller
         );
 
         return redirect()->route('pembimbing.dashboard')
-            ->with('success', "✅ Nilai akhir untuk {$siswa->name}: {$nilaiAkhir}/100 (Grade: " . $this->getGrade($nilaiAkhir) . ")");
-    }
-    
-    private function getGrade(int $nilai): string
-    {
-        if ($nilai >= 90) return 'A';
-        if ($nilai >= 80) return 'B';
-        if ($nilai >= 70) return 'C';
-        if ($nilai >= 60) return 'D';
-        return 'E';
+            ->with('success', "✅ Nilai akhir untuk {$siswa->name}: {$nilaiAkhir}/100 (Grade: " . $this->penilaianService->getGrade($nilaiAkhir) . ")");
     }
 }

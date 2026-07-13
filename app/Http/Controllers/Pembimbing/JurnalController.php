@@ -10,6 +10,21 @@ use Illuminate\Support\Facades\Auth;
 
 class JurnalController extends Controller
 {
+    public function getApprovalValidationRules(string $status): array
+    {
+        $rules = [
+            'status' => 'required|in:disetujui,revisi',
+            'nilai' => 'nullable|integer|min:0|max:100',
+            'catatan_revisi' => 'nullable|required_if:status,revisi|string|max:500',
+        ];
+
+        if ($status === 'disetujui') {
+            $rules['nilai'] = 'required|integer|min:0|max:100';
+        }
+
+        return $rules;
+    }
+
     public function index(Request $request)
     {
         $query = Jurnal::whereHas('siswa.siswaProfile', fn($q) => $q->where('pembimbing_id', Auth::id()))
@@ -19,8 +34,14 @@ class JurnalController extends Controller
         if ($request->filled('siswa_id')) {
             $query->where('siswa_user_id', $request->siswa_id);
         }
+
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        } else {
+            $query->where(function ($q) {
+                $q->where('status', '!=', 'disetujui')
+                  ->orWhereNull('nilai');
+            });
         }
 
         $jurnals = $query->latest()->paginate(15);
@@ -40,23 +61,50 @@ class JurnalController extends Controller
             abort(403, 'Akses ditolak.');
         }
 
-        $validated = $request->validate([
-            'status' => 'required|in:disetujui,revisi',
-            'nilai' => 'nullable|integer|min:0|max:100',
-            'catatan_revisi' => 'nullable|required_if:status,revisi|string|max:500'
-        ]);
+        $validated = $request->validate($this->getApprovalValidationRules($request->input('status')));
 
+        $this->saveReview($jurnal, $validated);
+
+        $msg = $validated['status'] === 'disetujui'
+            ? '✅ Jurnal disetujui'
+            : '🔄 Jurnal dikembalikan untuk revisi';
+        if (!empty($validated['nilai'])) {
+            $msg .= " (Nilai: {$validated['nilai']}/100)";
+        }
+
+        return back()->with('success', $msg);
+    }
+
+    public function edit(Jurnal $jurnal)
+    {
+        $profile = $jurnal->siswa->siswaProfile;
+        if (!$profile || $profile->pembimbing_id !== Auth::id()) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        return back()->with('edit_jurnal_id', $jurnal->id);
+    }
+
+    public function update(Request $request, Jurnal $jurnal)
+    {
+        $profile = $jurnal->siswa->siswaProfile;
+        if (!$profile || $profile->pembimbing_id !== Auth::id()) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        $validated = $request->validate($this->getApprovalValidationRules($request->input('status')));
+
+        $this->saveReview($jurnal, $validated);
+
+        return back()->with('success', '✅ Review jurnal berhasil diperbarui');
+    }
+
+    private function saveReview(Jurnal $jurnal, array $validated): void
+    {
         $jurnal->update([
             'status' => $validated['status'],
             'nilai' => $validated['nilai'] ?? null,
             'catatan_revisi' => $validated['catatan_revisi'] ?? null,
         ]);
-
-        $msg = $validated['status'] === 'disetujui' 
-            ? '✅ Jurnal disetujui' 
-            : '🔄 Jurnal dikembalikan untuk revisi';
-        if ($validated['nilai']) $msg .= " (Nilai: {$validated['nilai']}/100)";
-
-        return back()->with('success', $msg);
     }
 }

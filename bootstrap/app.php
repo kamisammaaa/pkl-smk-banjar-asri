@@ -14,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
+        // Tangkap error saat file melebihi post_max_size server
+        $middleware->web(prepend: [
+            \App\Http\Middleware\HandlePostTooLarge::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

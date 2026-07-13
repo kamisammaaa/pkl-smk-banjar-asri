@@ -139,6 +139,8 @@ Route::middleware(['auth', 'role:pembimbing'])->prefix('pembimbing')->name('pemb
     Route::post('/absensi/{absensi}/reject', [\App\Http\Controllers\Pembimbing\AbsensiController::class, 'reject'])->name('absensi.reject');
     // 📖 Review Jurnal
     Route::get('/jurnal', [\App\Http\Controllers\Pembimbing\JurnalController::class, 'index'])->name('jurnal');
+    Route::get('/jurnal/{jurnal}/edit', [\App\Http\Controllers\Pembimbing\JurnalController::class, 'edit'])->name('jurnal.edit');
+    Route::put('/jurnal/{jurnal}', [\App\Http\Controllers\Pembimbing\JurnalController::class, 'update'])->name('jurnal.update');
     Route::post('/jurnal/{jurnal}/approve', [\App\Http\Controllers\Pembimbing\JurnalController::class, 'approve'])->name('jurnal.approve');
     
     // 🏢 Input Kunjungan

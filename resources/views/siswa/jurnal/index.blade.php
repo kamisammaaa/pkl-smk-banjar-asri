@@ -75,11 +75,20 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Foto Dokumentasi <span class="text-slate-400 font-normal">(Opsional, maks 20MB)</span></label>
-                            <input type="file" name="foto" accept="image/*"
-                                class="w-full border border-slate-300 rounded-2xl px-3 py-2 text-sm file:mr-4 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition">
+                            <x-upload-foto
+                                name="foto"
+                                id="jurnal_foto_input"
+                                accept="image/*"
+                                :required="false"
+                                :max-mb="20"
+                                btn-color="blue"
+                                hint="📸 Upload foto dokumentasi kegiatan. Akan dikompres otomatis. Format: JPG, PNG."
+                            />
                         </div>
-                        <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold px-4 py-3 rounded-2xl hover:from-green-600 hover:to-emerald-700 transition text-sm active:scale-95 shadow-sm flex items-center justify-center gap-2">
-                            💾 Simpan Jurnal
+                        <button type="submit" id="jurnal_submit_btn" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold px-4 py-3 rounded-2xl hover:from-green-600 hover:to-emerald-700 transition text-sm active:scale-95 shadow-sm flex items-center justify-center gap-2">
+                            <span id="jurnal_submit_icon">💾</span>
+                            <span id="jurnal_submit_text">Simpan Jurnal</span>
+                            <span id="jurnal_submit_spinner" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
                         </button>
                     </form>
                 </div>
@@ -152,4 +161,28 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form      = document.querySelector('form[action="{{ route('siswa.jurnal.store') }}"]');
+    const submitBtn = document.getElementById('jurnal_submit_btn');
+
+    if (form && submitBtn) {
+        attachUploadProgress(form, ['jurnal_foto_input'], submitBtn);
+
+        // Fallback spinner jika tidak ada file
+        form.addEventListener('submit', function () {
+            const hasFile = document.getElementById('jurnal_foto_input')?.files?.length > 0;
+            if (!hasFile) {
+                submitBtn.disabled = true;
+                document.getElementById('jurnal_submit_text').textContent  = 'Menyimpan...';
+                document.getElementById('jurnal_submit_spinner').classList.remove('hidden');
+                document.getElementById('jurnal_submit_icon').classList.add('hidden');
+            }
+        });
+    }
+});
+</script>
+@endpush
 @endsection

@@ -7,10 +7,10 @@
     <title>{{ config('app.name', 'PKL SMK Banjar Asri') }} - Admin</title>
     
     <!-- Favicon Pack -->
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('logo.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('logo.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('logo.png') }}">
-    <link rel="shortcut icon" href="{{ asset('logo.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('android-chrome-192x192.png') }}?v={{ filemtime(public_path('android-chrome-192x192.png')) }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('android-chrome-192x192.png') }}?v={{ filemtime(public_path('android-chrome-192x192.png')) }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('android-chrome-192x192.png') }}?v={{ filemtime(public_path('android-chrome-192x192.png')) }}">
+    <link rel="shortcut icon" href="{{ asset('android-chrome-192x192.png') }}?v={{ filemtime(public_path('android-chrome-192x192.png')) }}">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     <meta name="theme-color" content="#4f46e5">
     <!-- Fonts -->

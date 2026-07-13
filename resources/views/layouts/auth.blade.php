@@ -7,10 +7,10 @@
     <title>@yield('page-title', 'Auth') - {{ config('app.name', 'PKL SMK Banjar Asri') }}</title>
     
     <!-- Favicon Pack -->
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('logo.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('logo.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('logo.png') }}">
-    <link rel="shortcut icon" href="{{ asset('logo.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('android-chrome-192x192.png') }}?v={{ filemtime(public_path('android-chrome-192x192.png')) }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('android-chrome-192x192.png') }}?v={{ filemtime(public_path('android-chrome-192x192.png')) }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('android-chrome-192x192.png') }}?v={{ filemtime(public_path('android-chrome-192x192.png')) }}">
+    <link rel="shortcut icon" href="{{ asset('android-chrome-192x192.png') }}?v={{ filemtime(public_path('android-chrome-192x192.png')) }}">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     <meta name="theme-color" content="#4f46e5">
 
@@ -36,7 +36,7 @@
         <!-- Logo / Brand -->
         <div class="text-center mb-8 hover-lift">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md mb-3.5 shadow-lg border border-white/10 p-2">
-                <img src="{{ asset('logo.png') }}" alt="Logo" class="w-full h-full object-contain">
+                <img src="{{ asset('android-chrome-192x192.png') }}?v={{ filemtime(public_path('android-chrome-192x192.png')) }}" alt="Logo" class="w-full h-full object-contain">
             </div>
             <h1 class="text-xl font-extrabold text-white tracking-tight">PKL SMK Banjar Asri</h1>
             <p class="text-slate-400 text-xs mt-1.5 font-medium tracking-wide">Sistem Informasi Praktek Kerja Lapangan</p>

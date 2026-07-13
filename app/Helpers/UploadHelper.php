@@ -29,34 +29,26 @@ class UploadHelper
                 $image = $manager->read($file->getRealPath());
 
                 // Scale down the image dimensions if it's too large.
-                // 1600px max width/height is more than enough for display and keeps quality high.
-                $image->scaleDown(width: 1600, height: 1600);
+                // 1200px max width/height is more than enough for display and keeps quality high while processing faster.
+                $image->scaleDown(width: 1200, height: 1200);
 
-                // Determine file extension
-                $extension = strtolower($file->getClientOriginalExtension());
-                if (!in_array($extension, ['jpg', 'jpeg', 'png', 'webp'])) {
-                    $extension = 'jpg';
-                }
+                // Force conversion of non-webp formats (png, bmp, etc.) to JPEG.
+                // PNG compression in GD is lossless and extremely slow/CPU-heavy.
+                // Converting to JPEG 75% is extremely fast and drops file size by 95%.
+                $originalExtension = strtolower($file->getClientOriginalExtension());
+                $extension = ($originalExtension === 'webp') ? 'webp' : 'jpg';
 
-                // Compress image to ensure it is under 1MB.
-                // Normally scaleDown to 1600 + quality 75/80 results in 100KB-400KB.
-                // We'll start with 75% quality.
-                if ($extension === 'png') {
-                    // For PNG, we can use toPng()
-                    $encoded = $image->toPng();
-                } elseif ($extension === 'webp') {
+                if ($extension === 'webp') {
                     $encoded = $image->toWebp(75);
                 } else {
                     $encoded = $image->toJpeg(75);
                 }
 
-                // If somehow the encoded string is still over 1MB (extremely rare for 1600px at 75 quality),
+                // If somehow the encoded string is still over 1MB (extremely rare for 1200px at 75 quality),
                 // we can recursively scale it down further or lower quality.
                 if (strlen($encoded) > 1024 * 1024) {
-                    $image->scaleDown(width: 1000, height: 1000);
-                    if ($extension === 'png') {
-                        $encoded = $image->toPng();
-                    } elseif ($extension === 'webp') {
+                    $image->scaleDown(width: 800, height: 800);
+                    if ($extension === 'webp') {
                         $encoded = $image->toWebp(60);
                     } else {
                         $encoded = $image->toJpeg(60);

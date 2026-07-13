@@ -7,10 +7,10 @@
     <title>@yield('page-title', 'Dashboard') - {{ config('app.name', 'PKL SMK Banjar Asri') }}</title>
     
     <!-- Favicon Pack -->
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('logo.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('logo.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('logo.png') }}">
-    <link rel="shortcut icon" href="{{ asset('logo.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('android-chrome-192x192.png') }}?v={{ filemtime(public_path('android-chrome-192x192.png')) }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('android-chrome-192x192.png') }}?v={{ filemtime(public_path('android-chrome-192x192.png')) }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('android-chrome-192x192.png') }}?v={{ filemtime(public_path('android-chrome-192x192.png')) }}">
+    <link rel="shortcut icon" href="{{ asset('android-chrome-192x192.png') }}?v={{ filemtime(public_path('android-chrome-192x192.png')) }}">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     <meta name="theme-color" content="#4f46e5">
     
@@ -54,7 +54,7 @@
             
             <!-- Logo Area -->
             <div class="h-16 flex items-center justify-start px-6 border-b border-slate-800 flex-shrink-0 gap-3">
-                <img src="{{ asset('logo.png') }}" alt="Logo" class="w-8 h-8 rounded-lg shadow-md bg-white p-0.5">
+                <img src="{{ asset('android-chrome-192x192.png') }}?v={{ filemtime(public_path('android-chrome-192x192.png')) }}" alt="Logo" class="w-8 h-8 rounded-lg shadow-md bg-white p-0.5">
                 <div class="truncate">
                     <h1 class="text-sm font-bold tracking-wide text-white leading-tight">
                         @if(auth()->check())
@@ -343,5 +343,230 @@
     
     <!-- Stack for page-specific scripts -->
     @stack('scripts')
+
+    {{-- ===== Global Upload Progress Handler ===== --}}
+    <script>
+    /**
+     * Global helper: dipanggil saat user memilih file pada input upload.
+     * Menangani:
+     *  1. Validasi ukuran file di client-side
+     *  2. Preview gambar
+     *  3. Progress bar saat form disubmit
+     */
+    function handleFileSelect(inputId) {
+        const input       = document.getElementById(inputId);
+        const progressArea = document.getElementById(inputId + '_progress_area');
+        const previewWrap  = document.getElementById(inputId + '_preview_wrap');
+        const thumb        = document.getElementById(inputId + '_thumb');
+        const fileName     = document.getElementById(inputId + '_file_name');
+        const fileSize     = document.getElementById(inputId + '_file_size');
+        const sizeError    = document.getElementById(inputId + '_size_error');
+        const sizeErrorMsg = document.getElementById(inputId + '_size_error_msg');
+        const barWrap      = document.getElementById(inputId + '_bar_wrap');
+
+        if (!input || !input.files || input.files.length === 0) return;
+
+        const file    = input.files[0];
+        const maxBytes = parseInt(input.getAttribute('data-max-bytes') || (20 * 1024 * 1024));
+        const maxMb    = parseFloat(input.getAttribute('data-max-mb') || 20);
+
+        // Tampilkan area progress
+        if (progressArea) progressArea.classList.remove('hidden');
+
+        // Reset state
+        if (sizeError)   sizeError.classList.add('hidden');
+        if (previewWrap) previewWrap.classList.add('hidden');
+        if (barWrap)     barWrap.classList.add('hidden');
+
+        // ===== Cek ukuran file =====
+        if (file.size > maxBytes) {
+            const fileMb   = (file.size / 1024 / 1024).toFixed(1);
+            if (sizeError)    sizeError.classList.remove('hidden');
+            if (sizeErrorMsg) sizeErrorMsg.textContent =
+                `File yang Anda pilih berukuran ${fileMb}MB, melebihi batas server ${maxMb}MB.`;
+            // Reset input agar tidak bisa disubmit
+            input.value = '';
+            return;
+        }
+
+        // ===== Preview nama & ukuran =====
+        if (fileName) fileName.textContent = file.name;
+        if (fileSize) fileSize.textContent = formatBytes(file.size);
+
+        // ===== Preview gambar (jika gambar) =====
+        if (thumb && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                thumb.src = e.target.result;
+                if (previewWrap) previewWrap.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        } else if (previewWrap) {
+            // Untuk non-gambar (PDF), tampilkan preview teks saja
+            if (thumb) thumb.style.display = 'none';
+            previewWrap.classList.remove('hidden');
+        }
+    }
+
+    /**
+     * Bersihkan pilihan file dan reset progress area.
+     */
+    function clearUpload(inputId) {
+        const input        = document.getElementById(inputId);
+        const progressArea = document.getElementById(inputId + '_progress_area');
+        const previewWrap  = document.getElementById(inputId + '_preview_wrap');
+        const barWrap      = document.getElementById(inputId + '_bar_wrap');
+        const sizeError    = document.getElementById(inputId + '_size_error');
+
+        if (input)        { input.value = ''; }
+        if (progressArea) { progressArea.classList.add('hidden'); }
+        if (previewWrap)  { previewWrap.classList.add('hidden'); }
+        if (barWrap)      { barWrap.classList.add('hidden'); }
+        if (sizeError)    { sizeError.classList.add('hidden'); }
+    }
+
+    /**
+     * Format bytes ke string yang mudah dibaca.
+     */
+    function formatBytes(bytes) {
+        if (bytes < 1024)        return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+    }
+
+    /**
+     * Aktifkan progress bar pada semua form yang punya file input.
+     * Dipanggil saat form disubmit — progress bar mengisi berdasarkan XHR progress.
+     *
+     * @param {HTMLFormElement} form       - form yang disubmit
+     * @param {string[]}        uploadIds  - array dari inputId yang punya progress bar
+     * @param {HTMLElement}     submitBtn  - tombol submit yang akan di-disable
+     */
+    function attachUploadProgress(form, uploadIds, submitBtn) {
+        form.addEventListener('submit', function(e) {
+            // Cek apakah ada file yang dipilih
+            const hasFile = uploadIds.some(id => {
+                const inp = document.getElementById(id);
+                return inp && inp.files && inp.files.length > 0;
+            });
+
+            if (!hasFile) return; // Tidak ada file, submit normal
+
+            e.preventDefault();
+
+            // Tampilkan progress bar untuk semua upload
+            uploadIds.forEach(id => {
+                const barWrap = document.getElementById(id + '_bar_wrap');
+                const bar     = document.getElementById(id + '_bar');
+                const barPct  = document.getElementById(id + '_bar_pct');
+                const barLabel = document.getElementById(id + '_bar_label');
+                const inp     = document.getElementById(id);
+
+                if (inp && inp.files && inp.files.length > 0) {
+                    if (barWrap)  barWrap.classList.remove('hidden');
+                    if (bar)      bar.style.width = '0%';
+                    if (barPct)   barPct.textContent = '0%';
+                    if (barLabel) barLabel.textContent = '📤 Mengupload foto ke server...';
+                }
+            });
+
+            // Disable tombol submit
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                const btnText = submitBtn.querySelector('#submitText') || submitBtn;
+                if (btnText.id === 'submitText') {
+                    btnText.textContent = 'Mengirim...';
+                    const spinner = submitBtn.querySelector('#submitSpinner');
+                    const icon    = submitBtn.querySelector('#submitIcon');
+                    if (spinner) spinner.classList.remove('hidden');
+                    if (icon)    icon.classList.add('hidden');
+                } else {
+                    submitBtn.textContent = '⏳ Mengirim...';
+                }
+            }
+
+            // Kirim via XHR agar bisa track progress
+            const formData = new FormData(form);
+            const xhr      = new XMLHttpRequest();
+
+            xhr.upload.addEventListener('progress', function(evt) {
+                if (!evt.lengthComputable) return;
+                const pct = Math.round((evt.loaded / evt.total) * 100);
+
+                uploadIds.forEach(id => {
+                    const bar     = document.getElementById(id + '_bar');
+                    const barPct  = document.getElementById(id + '_bar_pct');
+                    const barLabel = document.getElementById(id + '_bar_label');
+                    const barStatus = document.getElementById(id + '_bar_status');
+                    const inp     = document.getElementById(id);
+
+                    if (inp && inp.files && inp.files.length > 0) {
+                        if (bar)      bar.style.width = pct + '%';
+                        if (barPct)   barPct.textContent = pct + '%';
+                        if (barLabel) barLabel.textContent = pct < 100
+                            ? '📤 Mengupload... ' + formatBytes(evt.loaded) + ' / ' + formatBytes(evt.total)
+                            : '⚙️ Memproses & mengompresi foto di server...';
+                        if (barStatus && pct === 100) {
+                            barStatus.textContent = 'Upload selesai, menunggu kompresi server...';
+                        }
+                    }
+                });
+            });
+
+            xhr.addEventListener('load', function() {
+                // Redirect ke URL yang dikembalikan server
+                if (xhr.status === 200 || xhr.status === 302) {
+                    // Cek apakah respons adalah JSON (validasi error)
+                    try {
+                        const json = JSON.parse(xhr.responseText);
+                        if (json.redirect) {
+                            window.location.href = json.redirect;
+                            return;
+                        }
+                    } catch(e) {}
+                    // Ikuti redirect akhir XHR (halaman hasil)
+                    window.location.href = xhr.responseURL;
+                } else if (xhr.status === 413) {
+                    // File terlalu besar (ditangkap server)
+                    showUploadError(uploadIds, '❌ File terlalu besar untuk diproses server. Silakan gunakan foto yang lebih kecil dari 20MB.');
+                    if (submitBtn) submitBtn.disabled = false;
+                } else if (xhr.status === 422) {
+                    // Validasi Laravel gagal - redirect ke halaman yang sama
+                    window.location.href = window.location.href;
+                } else {
+                    // Error lain
+                    window.location.href = xhr.responseURL || window.location.href;
+                }
+            });
+
+            xhr.addEventListener('error', function() {
+                showUploadError(uploadIds, '❌ Koneksi terputus saat upload. Periksa koneksi internet Anda dan coba lagi.');
+                if (submitBtn) submitBtn.disabled = false;
+            });
+
+            xhr.addEventListener('timeout', function() {
+                showUploadError(uploadIds, '❌ Upload timeout. File terlalu besar atau koneksi terlalu lambat. Coba lagi dengan foto yang lebih kecil.');
+                if (submitBtn) submitBtn.disabled = false;
+            });
+
+            xhr.timeout = 120000; // 2 menit timeout
+            xhr.open(form.method.toUpperCase(), form.action);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.send(formData);
+        });
+    }
+
+    function showUploadError(uploadIds, message) {
+        uploadIds.forEach(id => {
+            const barLabel = document.getElementById(id + '_bar_label');
+            const bar      = document.getElementById(id + '_bar');
+            const barPct   = document.getElementById(id + '_bar_pct');
+            if (barLabel) { barLabel.textContent = message; barLabel.classList.add('text-red-600'); }
+            if (bar)      { bar.classList.remove('bg-blue-500','bg-green-500','bg-purple-500','bg-orange-500'); bar.classList.add('bg-red-500'); }
+            if (barPct)   { barPct.textContent = '❌'; }
+        });
+    }
+    </script>
 </body>
+
 </html>

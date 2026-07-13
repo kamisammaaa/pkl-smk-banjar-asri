@@ -68,7 +68,7 @@ class KunjunganController extends Controller
             'status' => 'required|in:rencana,selesai',
             'catatan_rencana' => 'required_if:status,rencana|nullable|string|max:1000',
             'catatan' => 'required_if:status,selesai|nullable|string|max:1000',
-            'foto' => 'nullable|image|max:2048|mimes:jpg,jpeg,png',
+            'foto' => 'nullable|image|max:20480|mimes:jpg,jpeg,png',
         ], [
             'perusahaan_id.required' => 'Pilih perusahaan terlebih dahulu',
             'tanggal.required' => 'Tanggal kunjungan wajib diisi',
@@ -76,7 +76,8 @@ class KunjunganController extends Controller
             'catatan_rencana.required_if' => 'Catatan rencana kunjungan wajib diisi jika status adalah Rencana',
             'catatan.required_if' => 'Catatan kunjungan wajib diisi jika status adalah Selesai',
             'foto.image' => 'File harus berupa gambar',
-            'foto.max' => 'Ukuran foto maksimal 2MB',
+            'foto.max' => 'Ukuran foto maksimal 20MB (akan dikompres otomatis)',
+            'foto.mimes' => 'Format foto harus jpg, jpeg, atau png',
         ]);
 
         // Validasi keamanan: Pastikan perusahaan diassign ke pembimbing ini
@@ -88,10 +89,14 @@ class KunjunganController extends Controller
             abort(403, 'Anda hanya bisa mencatat kunjungan untuk perusahaan yang Anda bimbing.');
         }
 
-        // Handle upload foto
+        // Handle upload foto dengan kompresi otomatis
         $fotoPath = null;
         if ($request->hasFile('foto')) {
-            $fotoPath = $request->file('foto')->store('kunjungan', 'public');
+            $fotoPath = \App\Helpers\UploadHelper::uploadAndCompress(
+                $request->file('foto'),
+                'kunjungan/' . date('Y/m'),
+                'public'
+            );
         }
 
         // Simpan kunjungan
@@ -143,7 +148,7 @@ class KunjunganController extends Controller
             'status' => 'required|in:rencana,selesai',
             'catatan_rencana' => 'required_if:status,rencana|nullable|string|max:1000',
             'catatan' => 'required_if:status,selesai|nullable|string|max:1000',
-            'foto' => 'nullable|image|max:2048|mimes:jpg,jpeg,png',
+            'foto' => 'nullable|image|max:20480|mimes:jpg,jpeg,png',
         ], [
             'perusahaan_id.required' => 'Pilih perusahaan terlebih dahulu',
             'tanggal.required' => 'Tanggal kunjungan wajib diisi',
@@ -151,7 +156,8 @@ class KunjunganController extends Controller
             'catatan_rencana.required_if' => 'Catatan rencana kunjungan wajib diisi jika status adalah Rencana',
             'catatan.required_if' => 'Catatan kunjungan wajib diisi jika status adalah Selesai',
             'foto.image' => 'File harus berupa gambar',
-            'foto.max' => 'Ukuran foto maksimal 2MB',
+            'foto.max' => 'Ukuran foto maksimal 20MB (akan dikompres otomatis)',
+            'foto.mimes' => 'Format foto harus jpg, jpeg, atau png',
         ]);
 
         // Validasi keamanan: Pastikan perusahaan diassign ke pembimbing ini
@@ -163,14 +169,18 @@ class KunjunganController extends Controller
             abort(403, 'Anda hanya bisa mencatat kunjungan untuk perusahaan yang Anda bimbing.');
         }
 
-        // Handle upload foto
+        // Handle upload foto dengan kompresi otomatis
         $fotoPath = $kunjungan->foto;
         if ($request->hasFile('foto')) {
             // Hapus foto lama jika ada
             if ($fotoPath) {
                 Storage::disk('public')->delete($fotoPath);
             }
-            $fotoPath = $request->file('foto')->store('kunjungan', 'public');
+            $fotoPath = \App\Helpers\UploadHelper::uploadAndCompress(
+                $request->file('foto'),
+                'kunjungan/' . date('Y/m'),
+                'public'
+            );
         }
 
         // Update kunjungan

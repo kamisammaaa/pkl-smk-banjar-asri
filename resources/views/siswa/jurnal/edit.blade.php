@@ -73,19 +73,24 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Foto Dokumentasi <span class="text-gray-400 font-normal">(Opsional, ganti jika perlu)</span></label>
-                    @if($jurnal->foto)
-                    <div class="mb-2 flex items-center gap-3">
-                        <img src="{{ Storage::url($jurnal->foto) }}" class="h-20 w-auto rounded-lg object-cover border border-gray-200" alt="Foto saat ini">
-                        <p class="text-xs text-gray-500">Foto saat ini. Upload baru untuk mengganti.</p>
-                    </div>
-                    @endif
-                    <input type="file" name="foto" accept="image/*"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition">
+                    <x-upload-foto
+                        name="foto"
+                        id="jurnal_edit_foto"
+                        accept="image/*"
+                        :required="false"
+                        :max-mb="20"
+                        btn-color="blue"
+                        hint="📸 Upload foto baru untuk mengganti. Akan dikompres otomatis. Format: JPG, PNG."
+                        :existing-url="$jurnal->foto ? Storage::url($jurnal->foto) : null"
+                        existing-label="Foto jurnal saat ini tersimpan. Upload baru untuk mengganti."
+                    />
                 </div>
 
                 <div class="flex gap-3 pt-2">
-                    <button type="submit" class="flex-1 bg-gradient-to-r {{ $jurnal->status === 'revisi' ? 'from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600' : 'from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700' }} text-white font-bold px-4 py-3 rounded-lg transition text-sm active:scale-95 shadow-sm">
-                        💾 {{ $jurnal->status === 'revisi' ? 'Simpan Revisi & Kirim Ulang' : 'Simpan Perubahan' }}
+                    <button type="submit" id="jurnal_edit_submit" class="flex-1 bg-gradient-to-r {{ $jurnal->status === 'revisi' ? 'from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600' : 'from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700' }} text-white font-bold px-4 py-3 rounded-lg transition text-sm active:scale-95 shadow-sm flex items-center justify-center gap-2">
+                        <span id="jurnal_edit_icon">💾</span>
+                        <span id="jurnal_edit_text">{{ $jurnal->status === 'revisi' ? 'Simpan Revisi & Kirim Ulang' : 'Simpan Perubahan' }}</span>
+                        <span id="jurnal_edit_spinner" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
                     </button>
                     <a href="{{ route('siswa.jurnal.index') }}" class="inline-flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-3 rounded-lg transition text-sm active:scale-95">
                         Batal
@@ -95,4 +100,25 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form      = document.getElementById('jurnal_edit_submit')?.closest('form');
+    const submitBtn = document.getElementById('jurnal_edit_submit');
+    if (form && submitBtn) {
+        attachUploadProgress(form, ['jurnal_edit_foto'], submitBtn);
+        form.addEventListener('submit', function () {
+            const hasFile = document.getElementById('jurnal_edit_foto')?.files?.length > 0;
+            if (!hasFile) {
+                submitBtn.disabled = true;
+                document.getElementById('jurnal_edit_text').textContent  = 'Menyimpan...';
+                document.getElementById('jurnal_edit_spinner').classList.remove('hidden');
+                document.getElementById('jurnal_edit_icon').classList.add('hidden');
+            }
+        });
+    }
+});
+</script>
+@endpush
 @endsection

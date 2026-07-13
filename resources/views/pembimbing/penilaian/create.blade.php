@@ -29,6 +29,10 @@
         </div>
     @endif
 
+    @php
+        $sikapNilai = old('nilai_sikap', $penilaian->nilai_sikap ?? 0);
+    @endphp
+
     <form action="{{ route('pembimbing.penilaian.final.store', $siswa->id) }}" method="POST" class="space-y-6">
         @csrf
         
@@ -62,6 +66,9 @@
                 <span class="text-sm text-gray-600">Nilai Absensi Otomatis:</span>
                 <span class="text-2xl font-bold text-blue-600">{{ $nilaiAbsensi }}/100</span>
             </div>
+            @if($hadir === 0 && $terlambat === 0 && $izin === 0 && $sakit === 0 && $alpha === 0)
+                <p class="text-xs text-amber-600 mt-2">⚠️ Belum ada data absensi terverifikasi, sehingga nilai absensi masih 0.</p>
+            @endif
         </div>
 
         <!-- 2. Nilai Jurnal (Auto) -->
@@ -77,7 +84,9 @@
                 <span class="text-2xl font-bold text-green-600">{{ $rataJurnal }}/100</span>
             </div>
             @if($jurnalDisetujui->count() > 0)
-                <p class="text-xs text-gray-500 mt-2">💡 Nilai dihitung dari jurnal yang sudah disetujui + nilai harian yang Anda input</p>
+                <p class="text-xs text-gray-500 mt-2">💡 Nilai dihitung dari jurnal yang sudah disetujui.</p>
+            @else
+                <p class="text-xs text-amber-600 mt-2">⚠️ Belum ada jurnal yang disetujui, sehingga nilai jurnal saat ini 0.</p>
             @endif
         </div>
 
@@ -88,11 +97,11 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nilai Sikap & Kinerja (0-100)</label>
                     <div class="flex items-center gap-4">
-                        <input type="range" name="nilai_sikap" min="0" max="100" value="{{ old('nilai_sikap', $penilaian->nilai_sikap ?? 80) }}" 
+                        <input type="range" name="nilai_sikap" min="0" max="100" value="{{ $sikapNilai }}" 
                                class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                                oninput="document.getElementById('sikap-value').textContent = this.value">
                         <span id="sikap-value" class="text-2xl font-bold text-orange-600 w-16 text-center">
-                            {{ old('nilai_sikap', $penilaian->nilai_sikap ?? 80) }}
+                            {{ $sikapNilai }}
                         </span>
                     </div>
                     <div class="flex justify-between text-xs text-gray-500 mt-1">
@@ -123,22 +132,22 @@
                 </div>
                 <div class="flex justify-between">
                     <span>Sikap (30%):</span>
-                    <span class="font-medium"><span id="input-sikap">{{ old('nilai_sikap', $penilaian->nilai_sikap ?? 80) }}</span> × 0.3 = <span id="calc-sikap">{{ round((old('nilai_sikap', $penilaian->nilai_sikap ?? 80)) * 0.3) }}</span></span>
+                    <span class="font-medium"><span id="input-sikap">{{ $sikapNilai }}</span> × 0.3 = <span id="calc-sikap">{{ round($sikapNilai * 0.3) }}</span></span>
                 </div>
                 <div class="border-t pt-3 mt-3 flex justify-between items-center">
                     <span class="font-bold text-lg text-blue-800">NILAI AKHIR:</span>
                     <span id="nilai-akhir-display" class="text-3xl font-bold text-blue-700">
-                        {{ round((0.3 * $nilaiAbsensi) + (0.4 * $rataJurnal) + (0.3 * (old('nilai_sikap', $penilaian->nilai_sikap ?? 80)))) }}
+                        {{ round((0.3 * $nilaiAbsensi) + (0.4 * $rataJurnal) + (0.3 * $sikapNilai)) }}
                     </span>
                     <span id="grade-display" class="px-3 py-1 rounded-full text-sm font-bold {{ 
-                        round((0.3 * $nilaiAbsensi) + (0.4 * $rataJurnal) + (0.3 * (old('nilai_sikap', $penilaian->nilai_sikap ?? 80)))) >= 80 ? 'bg-green-200 text-green-800' : 'bg-blue-200 text-blue-800' 
+                        round((0.3 * $nilaiAbsensi) + (0.4 * $rataJurnal) + (0.3 * $sikapNilai)) >= 80 ? 'bg-green-200 text-green-800' : 'bg-blue-200 text-blue-800' 
                     }}">
                         {{ 
                             match(true) {
-                                round((0.3 * $nilaiAbsensi) + (0.4 * $rataJurnal) + (0.3 * (old('nilai_sikap', $penilaian->nilai_sikap ?? 80)))) >= 90 => 'A',
-                                round((0.3 * $nilaiAbsensi) + (0.4 * $rataJurnal) + (0.3 * (old('nilai_sikap', $penilaian->nilai_sikap ?? 80)))) >= 80 => 'B',
-                                round((0.3 * $nilaiAbsensi) + (0.4 * $rataJurnal) + (0.3 * (old('nilai_sikap', $penilaian->nilai_sikap ?? 80)))) >= 70 => 'C',
-                                round((0.3 * $nilaiAbsensi) + (0.4 * $rataJurnal) + (0.3 * (old('nilai_sikap', $penilaian->nilai_sikap ?? 80)))) >= 60 => 'D',
+                                round((0.3 * $nilaiAbsensi) + (0.4 * $rataJurnal) + (0.3 * $sikapNilai)) >= 90 => 'A',
+                                round((0.3 * $nilaiAbsensi) + (0.4 * $rataJurnal) + (0.3 * $sikapNilai)) >= 80 => 'B',
+                                round((0.3 * $nilaiAbsensi) + (0.4 * $rataJurnal) + (0.3 * $sikapNilai)) >= 70 => 'C',
+                                round((0.3 * $nilaiAbsensi) + (0.4 * $rataJurnal) + (0.3 * $sikapNilai)) >= 60 => 'D',
                                 default => 'E'
                             }
                         }}

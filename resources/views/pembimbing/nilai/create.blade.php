@@ -91,7 +91,7 @@
                 <div class="mt-2">
                     <label class="block text-xs font-bold text-purple-800 mb-1">Input Nilai Sikap:</label>
                     <input type="number" name="nilai_sikap" min="0" max="100" 
-                           value="{{ old('nilai_sikap', $penilaian->nilai_sikap ?? 80) }}"
+                           value="{{ old('nilai_sikap', $penilaian->nilai_sikap ?? 0) }}"
                            required
                            id="inputSikap"
                            class="w-full border-2 border-purple-300 rounded-lg px-3 py-2 text-3xl font-bold text-center text-purple-800 focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition">
@@ -111,7 +111,7 @@
         <div class="mt-4 p-3 bg-gray-100 rounded-lg text-center border border-gray-200">
             <span class="text-sm text-gray-600">Estimasi Nilai Akhir: </span>
             <span id="previewNilai" class="text-2xl font-bold text-gray-800">
-                {{ round((0.3 * $nilaiAbsensi) + (0.4 * $nilaiJurnal) + (0.3 * ($penilaian->nilai_sikap ?? 80))) }}
+                {{ round((0.3 * $nilaiAbsensi) + (0.4 * $nilaiJurnal) + (0.3 * ($penilaian->nilai_sikap ?? 0))) }}
             </span>
             <span class="text-sm text-gray-500">/ 100</span>
         </div>

@@ -116,15 +116,15 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-1">
                         Foto Selfie Lokasi PKL <span class="text-red-500">*</span>
                     </label>
-                    <input type="file" 
-                           name="foto" 
-                           id="input_foto"
-                           accept="image/*" 
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-green-50 file:text-green-700 hover:file:bg-green-100 transition cursor-pointer">
-                    <p class="text-xs text-gray-500 mt-1">📸 Upload foto selfie sebagai bukti kehadiran. Waktu check-in akan direkam secara otomatis saat tombol <strong>Kirim Absensi</strong> ditekan.</p>
-                    @error('foto')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
+                    <x-upload-foto 
+                        name="foto" 
+                        id="input_foto"
+                        accept="image/*"
+                        :required="false"
+                        :max-mb="20"
+                        btn-color="green"
+                        hint="📸 Upload foto selfie sebagai bukti kehadiran. Foto akan dikompres otomatis. Waktu check-in direkam saat tombol Kirim ditekan."
+                    />
                 </div>
             </div>
 
@@ -150,15 +150,15 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-1" id="label_bukti">
                         Dokumen Bukti <span id="bukti_required_mark" class="text-red-500">*</span>
                     </label>
-                    <input type="file" 
-                           name="bukti" 
-                           id="input_bukti"
-                           accept="image/*,.pdf" 
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 transition cursor-pointer">
-                    <p class="text-xs text-gray-500 mt-1" id="bukti_hint">📄 Format: JPG, PNG, PDF. Maks. 2MB.</p>
-                    @error('bukti')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
+                    <x-upload-foto 
+                        name="bukti" 
+                        id="input_bukti"
+                        accept="image/*,.pdf"
+                        :required="false"
+                        :max-mb="20"
+                        btn-color="purple"
+                        hint="📄 Format: JPG, PNG, PDF. Maks. 20MB (akan dikompres otomatis untuk gambar)."
+                    />
                 </div>
             </div>
 
@@ -297,7 +297,9 @@
                 if (labelAlasan) labelAlasan.innerHTML = 'Alasan Sakit <span class="text-red-500">*</span>';
                 if (labelBukti)  labelBukti.innerHTML  = 'Surat Keterangan Dokter (Foto/PDF) <span class="text-red-500">*</span>';
                 if (inputBukti)  { inputBukti.required = true; inputBukti.disabled = false; }
-                if (buktiHint)   buktiHint.textContent = '📄 Upload surat keterangan dokter. Format: JPG, PNG, PDF. Maks. 2MB.';
+                // Update hint text di dalam komponen upload-foto
+                const buktiHintEl = document.getElementById('input_bukti_hint');
+                if (buktiHintEl) buktiHintEl.textContent = '📄 Upload surat keterangan dokter. Format: JPG, PNG, PDF. Maks. 20MB.';
                 if (buktiReqMark) buktiReqMark.classList.remove('hidden');
 
             } else if (statusValue === 'izin') {
@@ -306,7 +308,9 @@
                 if (labelAlasan) labelAlasan.innerHTML = 'Alasan Keperluan Izin <span class="text-red-500">*</span>';
                 if (labelBukti)  labelBukti.innerHTML  = 'Surat Izin / Dokumen Pendukung (Opsional)';
                 if (inputBukti)  { inputBukti.required = false; inputBukti.disabled = false; }
-                if (buktiHint)   buktiHint.textContent = '📄 Upload dokumen pendukung jika ada. Format: JPG, PNG, PDF. Maks. 2MB.';
+                // Update hint text di dalam komponen upload-foto
+                const buktiHintEl = document.getElementById('input_bukti_hint');
+                if (buktiHintEl) buktiHintEl.textContent = '📄 Upload dokumen pendukung jika ada. Format: JPG, PNG, PDF. Maks. 20MB.';
                 if (buktiReqMark) buktiReqMark.classList.add('hidden');
 
             } else if (statusValue === 'libur') {
@@ -362,14 +366,23 @@
         tickClock(); // Langsung tampil tanpa jeda
         setInterval(tickClock, 1000);
 
-        // Loading visual effect on submit
+        // Loading visual effect on submit — dengan upload progress
+        attachUploadProgress(
+            form,
+            ['input_foto', 'input_bukti'],
+            submitBtn
+        );
+
+        // Fallback: jika tidak ada file, tetap tampilkan spinner
         form.addEventListener('submit', function() {
-            setTimeout(function() {
-                submitBtn.disabled = true;
-            }, 1);
-            submitText.innerHTML = 'Mengirim...';
-            submitSpinner.classList.remove('hidden');
-            submitIcon.classList.add('hidden');
+            const hasFoto  = document.getElementById('input_foto')?.files?.length > 0;
+            const hasBukti = document.getElementById('input_bukti')?.files?.length > 0;
+            if (!hasFoto && !hasBukti) {
+                setTimeout(function() { submitBtn.disabled = true; }, 1);
+                submitText.innerHTML = 'Mengirim...';
+                submitSpinner.classList.remove('hidden');
+                submitIcon.classList.add('hidden');
+            }
         });
     });
 </script>

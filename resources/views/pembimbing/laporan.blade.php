@@ -132,18 +132,28 @@
                         
                         {{-- Nilai Kehadiran --}}
                         <td class="px-4 py-3 text-center">
-                            <div class="text-sm font-bold {{ $data['nilai_kehadiran'] >= 80 ? 'text-green-600' : ($data['nilai_kehadiran'] >= 60 ? 'text-yellow-600' : 'text-red-600') }}">
-                                {{ $data['nilai_kehadiran'] }}%
-                            </div>
-                            <div class="text-[10px] text-gray-400 mt-0.5">Total: {{ $data['total_absen'] }} hari</div>
+                            @if($data['total_absen'] > 0)
+                                <div class="text-sm font-bold {{ $data['nilai_kehadiran'] >= 80 ? 'text-green-600' : ($data['nilai_kehadiran'] >= 60 ? 'text-yellow-600' : 'text-red-600') }}">
+                                    {{ $data['nilai_kehadiran'] }}%
+                                </div>
+                                <div class="text-[10px] text-gray-400 mt-0.5">Total: {{ $data['total_absen'] }} hari</div>
+                            @else
+                                <div class="text-sm font-semibold text-gray-400">Belum ada data</div>
+                                <div class="text-[10px] text-gray-400 mt-0.5">Absensi kosong</div>
+                            @endif
                         </td>
                         
                         {{-- Nilai Jurnal --}}
                         <td class="px-4 py-3 text-center">
-                            <div class="text-sm font-bold {{ $data['nilai_jurnal'] >= 80 ? 'text-green-600' : ($data['nilai_jurnal'] >= 60 ? 'text-blue-600' : 'text-yellow-600') }}">
-                                {{ $data['nilai_jurnal'] }}
-                            </div>
-                            <div class="text-[10px] text-gray-400 mt-0.5">{{ $data['total_jurnal'] }} disetujui</div>
+                            @if($data['total_jurnal'] > 0)
+                                <div class="text-sm font-bold {{ $data['nilai_jurnal'] >= 80 ? 'text-green-600' : ($data['nilai_jurnal'] >= 60 ? 'text-blue-600' : 'text-yellow-600') }}">
+                                    {{ $data['nilai_jurnal'] }}
+                                </div>
+                                <div class="text-[10px] text-gray-400 mt-0.5">{{ $data['total_jurnal'] }} disetujui</div>
+                            @else
+                                <div class="text-sm font-semibold text-gray-400">Belum ada data</div>
+                                <div class="text-[10px] text-gray-400 mt-0.5">Jurnal kosong</div>
+                            @endif
                         </td>
                         
                         {{-- Nilai Akhir --}}
@@ -194,8 +204,8 @@
                 <p class="text-sm text-blue-700">
                     <strong>💡 Cara Hitung Nilai Kehadiran:</strong><br>
                     ✅ Hadir tepat waktu = 100 poin • ⏰ Terlambat = 70 poin<br>
-                    🤒 Sakit / 📝 Izin = 50 poin • ❌ Alpha = 0 poin<br>
-                    Nilai akhir = Rata-rata tertimbang dari semua hari absensi.
+                    🤒 Sakit / 📝 Izin = 100 poin • ❌ Alpha = 0 poin<br>
+                    Nilai akhir = Rata-rata tertimbang dari semua hari absensi yang tersedia.
                 </p>
             </div>
         </div>

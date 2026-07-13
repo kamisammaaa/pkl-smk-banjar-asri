@@ -8,11 +8,16 @@ use App\Models\Absensi;
 use App\Models\Jurnal;
 use App\Models\PenilaianAkhir;
 use App\Helpers\AttendanceHelper;
+use App\Services\PenilaianService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class LaporanController extends Controller
 {
+    public function __construct(private readonly PenilaianService $penilaianService)
+    {
+    }
+
     public function index(Request $request)
     {
         $query = SiswaProfile::where('pembimbing_id', auth()->id())
@@ -50,19 +55,19 @@ class LaporanController extends Controller
             $hariAktif = $totalAbsen - $libur;
 
             // Hitung nilai kehadiran berbasis hari aktif
-            // Hadir tepat waktu=100, Terlambat=75, Sakit/Izin=50, Alpha=0
-            $totalPoin     = ($hadir * 100) + ($terlambat * 75) + (($sakit + $izin) * 50) + ($alpha * 0);
+            // Hadir tepat waktu=100, Terlambat=70, Sakit/Izin=100, Alpha=0
+            $totalPoin     = ($hadir * 100) + ($terlambat * 70) + (($sakit + $izin) * 100) + ($alpha * 0);
             $nilaiKehadiran = $hariAktif > 0 ? round($totalPoin / $hariAktif) : 0;
 
             // Persentase kehadiran murni (hadir / hari aktif)
             $persentaseHadir = $hariAktif > 0 ? round((($hadir + $terlambat) / $hariAktif) * 100, 1) : 0;
 
-            // Nilai jurnal
+            // Nilai jurnal berdasarkan hari aktif
             $jurnalDisetujui = Jurnal::where('siswa_user_id', $siswa->user_id)
                 ->where('status', 'disetujui')
                 ->get();
 
-            $nilaiJurnal = $jurnalDisetujui->avg('nilai') ?? 0;
+            $nilaiJurnal = $this->penilaianService->calculateNilaiJurnal($jurnalDisetujui, max($hariAktif, 1));
 
             // Nilai akhir jika ada
             $penilaian = PenilaianAkhir::where('siswa_user_id', $siswa->user_id)
@@ -159,11 +164,11 @@ class LaporanController extends Controller
                 $totalAbsen = $absensi->count();
                 $hariAktif = $totalAbsen - $libur;
                 $persentase = $hariAktif > 0 ? round((($hadir + $terlambat) / $hariAktif) * 100, 1) : 0;
-                $totalPoin  = ($hadir * 100) + ($terlambat * 75) + (($sakit + $izin) * 50);
+                $totalPoin  = ($hadir * 100) + ($terlambat * 70) + (($sakit + $izin) * 100);
                 $nilaiKehadiran = $hariAktif > 0 ? round($totalPoin / $hariAktif) : 0;
 
                 $jurnalList  = $allJurnal->get($siswa->user_id, collect());
-                $nilaiJurnal = round($jurnalList->avg('nilai') ?? 0);
+                $nilaiJurnal = $this->penilaianService->calculateNilaiJurnal($jurnalList, max($hariAktif, 1));
 
                 $penilaian  = $allNilai->get($siswa->user_id);
                 $nilaiAkhir = $penilaian?->nilai_akhir ?? '-';
