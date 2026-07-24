@@ -24,13 +24,13 @@ class LaporanController extends Controller
         $query = SiswaProfile::where('pembimbing_id', auth()->id())
             ->with(['user', 'perusahaan.periodePKL', 'jurusan']);
 
-        // Filter
         if ($request->filled('perusahaan_id')) {
             $query->where('perusahaan_id', $request->perusahaan_id);
         }
         if ($request->filled('jurusan_id')) {
             $query->where('jurusan_id', $request->jurusan_id);
         }
+        $filter_masalah = $request->get('filter_masalah');
 
         $siswaList = $query->get();
 
@@ -78,6 +78,11 @@ class LaporanController extends Controller
                 ->where('pembimbing_id', auth()->id())
                 ->first();
 
+            if ($filter_masalah === 'alpha' && $alpha == 0) continue;
+            if ($filter_masalah === 'sakit' && $sakit == 0) continue;
+            if ($filter_masalah === 'izin' && $izin == 0) continue;
+            if ($filter_masalah === 'terlambat' && $terlambat == 0) continue;
+
             $laporanData[] = [
                 'siswa'            => $siswa,
                 // Absensi breakdown
@@ -103,7 +108,7 @@ class LaporanController extends Controller
         $perusahaanList = \App\Models\Perusahaan::distinct()->pluck('nama', 'id');
         $jurusanList    = \App\Models\Jurusan::distinct()->pluck('nama', 'id');
 
-        return view('pembimbing.laporan', compact('laporanData', 'perusahaanList', 'jurusanList'));
+        return view('pembimbing.laporan', compact('laporanData', 'perusahaanList', 'jurusanList', 'filter_masalah'));
     }
 
     public function export(Request $request)
@@ -117,6 +122,7 @@ class LaporanController extends Controller
         if ($request->filled('jurusan_id')) {
             $query->where('jurusan_id', $request->jurusan_id);
         }
+        $filter_masalah = $request->get('filter_masalah');
 
         $siswaList = $query->get();
 
@@ -144,7 +150,7 @@ class LaporanController extends Controller
             'Expires'             => '0',
         ];
 
-        return response()->stream(function () use ($siswaList, $allAbsensi, $allJurnal, $allNilai) {
+        return response()->stream(function () use ($siswaList, $allAbsensi, $allJurnal, $allNilai, $filter_masalah) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM UTF-8
 
@@ -180,6 +186,11 @@ class LaporanController extends Controller
                 $penilaian  = $allNilai->get($siswa->user_id);
                 $nilaiAkhir = $penilaian?->nilai_akhir ?? '-';
                 $grade      = $penilaian?->grade ?? '-';
+
+                if ($filter_masalah === 'alpha' && $alpha == 0) continue;
+                if ($filter_masalah === 'sakit' && $sakit == 0) continue;
+                if ($filter_masalah === 'izin' && $izin == 0) continue;
+                if ($filter_masalah === 'terlambat' && $terlambat == 0) continue;
 
                 fputcsv($file, [
                     $no++,

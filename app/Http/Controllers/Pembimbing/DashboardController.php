@@ -105,7 +105,7 @@ class DashboardController extends Controller
         $totalPerusahaan = \App\Models\Perusahaan::where('pembimbing_id', $pembimbingId)->count();
 
         // 8. 🔥 Early Warning System: Siswa dengan Alpha >= 3
-        $siswaBermasalahAlpha = SiswaProfile::where('pembimbing_id', $pembimbingId)
+        $siswaBermasalahAlpha = collect(SiswaProfile::where('pembimbing_id', $pembimbingId)
             ->whereHas('user.absensis', function($sq) {
                 $sq->where('status', 'alpha');
             }, '>=', 3)
@@ -118,10 +118,10 @@ class DashboardController extends Controller
                     'nama' => $profile->user->name ?? 'Unknown',
                     'masalah' => 'Alpha ' . $profile->user->absensis->count() . ' kali'
                 ];
-            });
+            })->all());
 
         // 9. 🔥 Early Warning System: Siswa Tanpa Jurnal sama sekali
-        $siswaTanpaJurnal = SiswaProfile::where('pembimbing_id', $pembimbingId)
+        $siswaTanpaJurnal = collect(SiswaProfile::where('pembimbing_id', $pembimbingId)
             ->whereDoesntHave('user.jurnals')
             ->with('user')
             ->get()
@@ -130,9 +130,31 @@ class DashboardController extends Controller
                     'nama' => $profile->user->name ?? 'Unknown',
                     'masalah' => 'Belum pernah mengisi jurnal'
                 ];
-            });
+            })->all());
             
-        $earlyWarnings = $siswaBermasalahAlpha->merge($siswaTanpaJurnal);
+        // 11. 🔥 Early Warning System: Siswa Belum Absen Hari Ini
+        $siswaBelumAbsen = collect();
+        if (Carbon::today()->dayOfWeek !== Carbon::SUNDAY) {
+            $siswaBelumAbsen = collect(SiswaProfile::where('pembimbing_id', $pembimbingId)
+                ->whereDoesntHave('user.absensis', function($sq) {
+                    $sq->whereDate('tanggal', Carbon::today());
+                })
+                ->whereHas('perusahaan.periodePKL', function($sq) {
+                    $sq->where('is_active', true)
+                       ->whereDate('tanggal_mulai', '<=', Carbon::today())
+                       ->whereDate('tanggal_selesai', '>=', Carbon::today());
+                })
+                ->with('user')
+                ->get()
+                ->map(function($profile) {
+                    return [
+                        'nama' => $profile->user->name ?? 'Unknown',
+                        'masalah' => 'Belum mengisi absensi hari ini'
+                    ];
+                })->all());
+        }
+            
+        $earlyWarnings = $siswaBermasalahAlpha->merge($siswaTanpaJurnal)->merge($siswaBelumAbsen);
 
         // 10. 📊 Data Grafik: Rekap Kehadiran Seluruh Siswa Binaan
         $chartDataRaw = DB::table('absensis')

@@ -17,9 +17,10 @@ class RekapAbsensiController extends Controller
         // Generate alpha untuk semua siswa aktif (berdasarkan periode masing-masing)
         AttendanceHelper::generateAlphaForAllActiveSiswa();
 
-        $bulan         = $request->get('bulan', now()->format('Y-m'));
-        $pembimbing_id = $request->get('pembimbing_id');
-        $jurusan_id    = $request->get('jurusan_id');
+        $bulan          = $request->get('bulan', now()->format('Y-m'));
+        $pembimbing_id  = $request->get('pembimbing_id');
+        $jurusan_id     = $request->get('jurusan_id');
+        $filter_masalah = $request->get('filter_masalah');
 
         $query = User::where('role', 'siswa')
             ->with('siswaProfile.jurusan', 'siswaProfile.pembimbing', 'siswaProfile.perusahaan.periodePKL');
@@ -59,6 +60,11 @@ class RekapAbsensiController extends Controller
             // Persentase kehadiran: (hadir + terlambat) / hari aktif — konsisten dengan panel pembimbing
             $persentase = $hariAktif > 0 ? round((($hadir + $terlambat) / $hariAktif) * 100, 1) : 0;
 
+            if ($filter_masalah === 'alpha' && $alpha == 0) continue;
+            if ($filter_masalah === 'sakit' && $sakit == 0) continue;
+            if ($filter_masalah === 'izin' && $izin == 0) continue;
+            if ($filter_masalah === 'terlambat' && $terlambat == 0) continue;
+
             $rekap[] = [
                 'siswa'      => $s,
                 'hadir'      => $hadir,
@@ -77,7 +83,7 @@ class RekapAbsensiController extends Controller
         $jurusanList    = Jurusan::orderBy('nama')->get();
 
         return view('admin.rekap-absensi.index', compact(
-            'rekap', 'bulan', 'pembimbingList', 'jurusanList', 'pembimbing_id', 'jurusan_id'
+            'rekap', 'bulan', 'pembimbingList', 'jurusanList', 'pembimbing_id', 'jurusan_id', 'filter_masalah'
         ));
     }
 
@@ -88,9 +94,10 @@ class RekapAbsensiController extends Controller
     {
         AttendanceHelper::generateAlphaForAllActiveSiswa();
 
-        $bulan         = $request->get('bulan', now()->format('Y-m'));
-        $pembimbing_id = $request->get('pembimbing_id');
-        $jurusan_id    = $request->get('jurusan_id');
+        $bulan          = $request->get('bulan', now()->format('Y-m'));
+        $pembimbing_id  = $request->get('pembimbing_id');
+        $jurusan_id     = $request->get('jurusan_id');
+        $filter_masalah = $request->get('filter_masalah');
 
         $query = User::where('role', 'siswa')
             ->with('siswaProfile.jurusan', 'siswaProfile.pembimbing', 'siswaProfile.perusahaan.periodePKL');
@@ -121,7 +128,7 @@ class RekapAbsensiController extends Controller
             'Expires'             => '0',
         ];
 
-        $callback = function () use ($siswaList, $allAbsensi) {
+        $callback = function () use ($siswaList, $allAbsensi, $filter_masalah) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
@@ -160,6 +167,11 @@ class RekapAbsensiController extends Controller
 
                 $hariAktif  = $total - $libur;
                 $persentase = $hariAktif > 0 ? round((($hadir + $terlambat) / $hariAktif) * 100, 1) : 0;
+
+                if ($filter_masalah === 'alpha' && $alpha == 0) continue;
+                if ($filter_masalah === 'sakit' && $sakit == 0) continue;
+                if ($filter_masalah === 'izin' && $izin == 0) continue;
+                if ($filter_masalah === 'terlambat' && $terlambat == 0) continue;
 
                 $keterangan = match(true) {
                     $persentase >= 90 => 'Sangat Baik',

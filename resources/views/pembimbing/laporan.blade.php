@@ -22,7 +22,7 @@
 
     <!-- Filter -->
     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-        <form method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Perusahaan</label>
                 <select name="perusahaan_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500">
@@ -39,6 +39,16 @@
                     @foreach($jurusanList as $id => $nama)
                         <option value="{{ $id }}" {{ request('jurusan_id') == $id ? 'selected' : '' }}>{{ $nama }}</option>
                     @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Masalah Kehadiran</label>
+                <select name="filter_masalah" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500">
+                    <option value="">Semua Siswa</option>
+                    <option value="alpha" {{ request('filter_masalah') == 'alpha' ? 'selected' : '' }}>❌ Ada Alpha</option>
+                    <option value="sakit" {{ request('filter_masalah') == 'sakit' ? 'selected' : '' }}>🤒 Ada Sakit</option>
+                    <option value="izin" {{ request('filter_masalah') == 'izin' ? 'selected' : '' }}>📝 Ada Izin</option>
+                    <option value="terlambat" {{ request('filter_masalah') == 'terlambat' ? 'selected' : '' }}>⏰ Ada Terlambat</option>
                 </select>
             </div>
             <div class="flex items-end gap-2">
