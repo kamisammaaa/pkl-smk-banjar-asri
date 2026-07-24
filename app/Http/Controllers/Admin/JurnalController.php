@@ -115,6 +115,16 @@ class JurnalController extends Controller
     {
         $query = Jurnal::with(['siswa.siswaProfile.jurusan', 'siswa.siswaProfile.pembimbing']);
 
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('siswa', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhereHas('siswaProfile', function($sq) use ($search) {
+                      $sq->where('nis', 'like', "%{$search}%");
+                  });
+            });
+        }
+
         if ($request->filled('start_date')) {
             $query->whereDate('tanggal', '>=', $request->start_date);
         }
