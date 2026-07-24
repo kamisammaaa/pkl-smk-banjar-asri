@@ -32,16 +32,22 @@ class PenilaianController extends Controller
             ->where('is_verified', true)
             ->get();
             
-        $hadir = $absensi->where('status', 'hadir')->where('check_in', '<=', '07:30:00')->count();
-        $terlambat = $absensi->where('status', 'hadir')->where('check_in', '>', '07:30:00')->count();
-        $izin = $absensi->where('status', 'izin')->count();
-        $sakit = $absensi->where('status', 'sakit')->count();
-        $alpha = $absensi->where('status', 'alpha')->count();
-        $total = $absensi->count();
-        
-        // Formula: (hadir*100 + terlambat*70 + (izin+sakit)*100 + alpha*0) / total
+        // Gunakan is_late yang sudah dihitung berdasarkan jam_masuk perusahaan saat check-in
+        $hadirVerified = $absensi->where('status', 'hadir');
+        $hadir     = $hadirVerified->where('is_late', false)->count();
+        $terlambat = $hadirVerified->where('is_late', true)->count();
+        $izin      = $absensi->where('status', 'izin')->count();
+        $sakit     = $absensi->where('status', 'sakit')->count();
+        $libur     = $absensi->where('status', 'libur')->count();
+        $alpha     = $absensi->where('status', 'alpha')->count();
+        $total     = $absensi->count();
+
+        // Hari aktif = total - libur (konsisten dengan LaporanController)
+        $hariAktif = max($total - $libur, 1);
+
+        // Formula: (hadir*100 + terlambat*70 + (izin+sakit)*100 + alpha*0) / hariAktif
         $nilaiAbsensi = $total > 0
-            ? round((($hadir * 100) + ($terlambat * 70) + (($izin + $sakit) * 100)) / $total)
+            ? round((($hadir * 100) + ($terlambat * 70) + (($izin + $sakit) * 100)) / $hariAktif)
             : 0;
 
         // Hitung rata-rata nilai jurnal yang disetujui

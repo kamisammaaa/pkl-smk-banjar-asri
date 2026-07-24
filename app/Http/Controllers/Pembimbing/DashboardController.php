@@ -104,6 +104,54 @@ class DashboardController extends Controller
 
         $totalPerusahaan = \App\Models\Perusahaan::where('pembimbing_id', $pembimbingId)->count();
 
+        // 8. 🔥 Early Warning System: Siswa dengan Alpha >= 3
+        $siswaBermasalahAlpha = SiswaProfile::where('pembimbing_id', $pembimbingId)
+            ->whereHas('user.absensis', function($sq) {
+                $sq->where('status', 'alpha');
+            }, '>=', 3)
+            ->with(['user', 'user.absensis' => function($q) {
+                $q->where('status', 'alpha');
+            }])
+            ->get()
+            ->map(function($profile) {
+                return [
+                    'nama' => $profile->user->name ?? 'Unknown',
+                    'masalah' => 'Alpha ' . $profile->user->absensis->count() . ' kali'
+                ];
+            });
+
+        // 9. 🔥 Early Warning System: Siswa Tanpa Jurnal sama sekali
+        $siswaTanpaJurnal = SiswaProfile::where('pembimbing_id', $pembimbingId)
+            ->whereDoesntHave('user.jurnals')
+            ->with('user')
+            ->get()
+            ->map(function($profile) {
+                return [
+                    'nama' => $profile->user->name ?? 'Unknown',
+                    'masalah' => 'Belum pernah mengisi jurnal'
+                ];
+            });
+            
+        $earlyWarnings = $siswaBermasalahAlpha->merge($siswaTanpaJurnal);
+
+        // 10. 📊 Data Grafik: Rekap Kehadiran Seluruh Siswa Binaan
+        $chartDataRaw = DB::table('absensis')
+            ->join('users', 'absensis.siswa_user_id', '=', 'users.id')
+            ->join('siswa_profiles', 'users.id', '=', 'siswa_profiles.user_id')
+            ->where('siswa_profiles.pembimbing_id', $pembimbingId)
+            ->select('absensis.status', DB::raw('count(*) as total'))
+            ->groupBy('absensis.status')
+            ->get()
+            ->pluck('total', 'status')
+            ->toArray();
+
+        $chartAbsensi = [
+            'hadir' => $chartDataRaw['hadir'] ?? 0,
+            'sakit' => $chartDataRaw['sakit'] ?? 0,
+            'izin'  => $chartDataRaw['izin'] ?? 0,
+            'alpha' => $chartDataRaw['alpha'] ?? 0,
+        ];
+
         return view('pembimbing.dashboard', [
             'totalSiswa' => $totalSiswa,
             'totalPerusahaan' => $totalPerusahaan,
@@ -111,7 +159,9 @@ class DashboardController extends Controller
             'absensiPerluApprove' => $absensiBelumVerif,
             'kunjunganMendatang' => $kunjunganHariIni,
             'siswaAbsenHariIni' => $kehadiranHariIni,
-            'aktivitasTerbaru' => $aktivitasTerbaru
+            'aktivitasTerbaru' => $aktivitasTerbaru,
+            'earlyWarnings' => $earlyWarnings,
+            'chartAbsensi' => $chartAbsensi
         ]);
     }
 }

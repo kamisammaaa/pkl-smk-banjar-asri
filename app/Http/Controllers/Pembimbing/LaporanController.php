@@ -11,6 +11,7 @@ use App\Helpers\AttendanceHelper;
 use App\Services\PenilaianService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 
 class LaporanController extends Controller
 {
@@ -42,8 +43,9 @@ class LaporanController extends Controller
                 ->get();
 
             // Hitung breakdown status
-            $hadir     = $absensi->where('status', 'hadir')->where('check_in', '<=', '07:30:00')->count();
-            $terlambat = $absensi->where('status', 'hadir')->where('check_in', '>', '07:30:00')->count();
+            // Gunakan is_late yang sudah dihitung berdasarkan jam_masuk perusahaan saat check-in
+            $hadir     = $absensi->where('status', 'hadir')->where('is_late', false)->count();
+            $terlambat = $absensi->where('status', 'hadir')->where('is_late', true)->count();
             $sakit     = $absensi->where('status', 'sakit')->count();
             $izin      = $absensi->where('status', 'izin')->count();
             $libur     = $absensi->where('status', 'libur')->count();
@@ -62,12 +64,14 @@ class LaporanController extends Controller
             // Persentase kehadiran murni (hadir / hari aktif)
             $persentaseHadir = $hariAktif > 0 ? round((($hadir + $terlambat) / $hariAktif) * 100, 1) : 0;
 
-            // Nilai jurnal berdasarkan hari aktif
+            // Jurnal wajib dikerjakan pada hari hadir + terlambat + alpha.
+            // (Libur, sakit, dan izin tidak dihitung sebagai kewajiban jurnal.)
+            $hariMasuk = $hadir + $terlambat + $alpha;
             $jurnalDisetujui = Jurnal::where('siswa_user_id', $siswa->user_id)
                 ->where('status', 'disetujui')
                 ->get();
 
-            $nilaiJurnal = $this->penilaianService->calculateNilaiJurnal($jurnalDisetujui, max($hariAktif, 1));
+            $nilaiJurnal = $this->penilaianService->calculateNilaiJurnal($jurnalDisetujui, max($hariMasuk, 1));
 
             // Nilai akhir jika ada
             $penilaian = PenilaianAkhir::where('siswa_user_id', $siswa->user_id)
@@ -155,8 +159,9 @@ class LaporanController extends Controller
             foreach ($siswaList as $siswa) {
                 $absensi = $allAbsensi->get($siswa->user_id, collect());
 
-                $hadir     = $absensi->where('status', 'hadir')->where('check_in', '<=', '07:30:00')->count();
-                $terlambat = $absensi->where('status', 'hadir')->where('check_in', '>', '07:30:00')->count();
+                // Gunakan is_late yang sudah dihitung berdasarkan jam_masuk perusahaan saat check-in
+                $hadir     = $absensi->where('status', 'hadir')->where('is_late', false)->count();
+                $terlambat = $absensi->where('status', 'hadir')->where('is_late', true)->count();
                 $sakit     = $absensi->where('status', 'sakit')->count();
                 $izin      = $absensi->where('status', 'izin')->count();
                 $libur     = $absensi->where('status', 'libur')->count();
@@ -167,8 +172,10 @@ class LaporanController extends Controller
                 $totalPoin  = ($hadir * 100) + ($terlambat * 70) + (($sakit + $izin) * 100);
                 $nilaiKehadiran = $hariAktif > 0 ? round($totalPoin / $hariAktif) : 0;
 
+                // Jurnal wajib dikerjakan pada hari hadir + terlambat + alpha.
+                $hariMasukExport = $hadir + $terlambat + $alpha;
                 $jurnalList  = $allJurnal->get($siswa->user_id, collect());
-                $nilaiJurnal = $this->penilaianService->calculateNilaiJurnal($jurnalList, max($hariAktif, 1));
+                $nilaiJurnal = $this->penilaianService->calculateNilaiJurnal($jurnalList, max($hariMasukExport, 1));
 
                 $penilaian  = $allNilai->get($siswa->user_id);
                 $nilaiAkhir = $penilaian?->nilai_akhir ?? '-';

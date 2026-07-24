@@ -4,11 +4,19 @@
 @section('content')
 <div class="space-y-6">
     <!-- Header -->
-    <div class="flex justify-between items-center">
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <h2 class="text-2xl font-bold text-gray-800">🏢 Daftar Kunjungan Industri</h2>
-        <a href="{{ route('pembimbing.kunjungan.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
-            + Input Kunjungan Baru
-        </a>
+        <div class="flex items-center gap-3">
+            <!-- Toggles -->
+            <div class="bg-gray-200 p-1 rounded-lg flex items-center">
+                <button type="button" id="btn-table" class="px-4 py-1.5 text-sm font-medium rounded-md bg-white shadow-sm text-gray-800 transition">Tabel</button>
+                <button type="button" id="btn-calendar" class="px-4 py-1.5 text-sm font-medium rounded-md text-gray-600 hover:text-gray-800 transition">Kalender</button>
+            </div>
+            
+            <a href="{{ route('pembimbing.kunjungan.create') }}" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition h-full flex items-center">
+                + Input Kunjungan
+            </a>
+        </div>
     </div>
 
     @if(session('success'))
@@ -17,8 +25,9 @@
         </div>
     @endif
 
-    <!-- Filter Card -->
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+    <div id="table-container" class="space-y-6">
+        <!-- Filter Card -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
         <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Perusahaan</label>
@@ -145,5 +154,83 @@
             {{ $kunjungans->links() }}
         </div>
     </div>
+    </div> <!-- end table-container -->
+
+    <!-- Calendar Container -->
+    <div id="calendar-container" class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 hidden">
+        <div class="flex items-center justify-end gap-4 mb-4">
+            <span class="flex items-center text-xs font-medium"><span class="w-3 h-3 rounded-full bg-blue-500 mr-1.5"></span> Rencana</span>
+            <span class="flex items-center text-xs font-medium"><span class="w-3 h-3 rounded-full bg-green-500 mr-1.5"></span> Selesai</span>
+        </div>
+        <div id="calendar" class="w-full min-h-[600px]"></div>
+    </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/fullcalendar.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab Toggling
+    const btnTable = document.getElementById('btn-table');
+    const btnCalendar = document.getElementById('btn-calendar');
+    const tableContainer = document.getElementById('table-container');
+    const calendarContainer = document.getElementById('calendar-container');
+
+    let calendarRendered = false;
+    let calendar = null;
+
+    function renderCalendar() {
+        if (calendarRendered) return;
+        const calendarEl = document.getElementById('calendar');
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,dayGridWeek'
+            },
+            locale: 'id',
+            buttonText: {
+                today: 'Hari Ini',
+                month: 'Bulan',
+                week: 'Minggu'
+            },
+            events: {!! json_encode($calendarEvents) !!},
+            eventClick: function(info) {
+                if (info.event.url) {
+                    window.location.href = info.event.url;
+                    info.jsEvent.preventDefault();
+                }
+            }
+        });
+        calendar.render();
+        calendarRendered = true;
+    }
+
+    btnTable.addEventListener('click', () => {
+        tableContainer.classList.remove('hidden');
+        calendarContainer.classList.add('hidden');
+        
+        btnTable.classList.add('bg-white', 'shadow-sm', 'text-gray-800');
+        btnTable.classList.remove('text-gray-600');
+        
+        btnCalendar.classList.remove('bg-white', 'shadow-sm', 'text-gray-800');
+        btnCalendar.classList.add('text-gray-600');
+    });
+
+    btnCalendar.addEventListener('click', () => {
+        tableContainer.classList.add('hidden');
+        calendarContainer.classList.remove('hidden');
+        
+        btnCalendar.classList.add('bg-white', 'shadow-sm', 'text-gray-800');
+        btnCalendar.classList.remove('text-gray-600');
+        
+        btnTable.classList.remove('bg-white', 'shadow-sm', 'text-gray-800');
+        btnTable.classList.add('text-gray-600');
+
+        renderCalendar();
+    });
+});
+</script>
+@endpush

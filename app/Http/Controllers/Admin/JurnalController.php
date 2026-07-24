@@ -107,4 +107,72 @@ class JurnalController extends Controller
 
         return back()->with('success', "✅ Berhasil menghapus <strong>{$count}</strong> jurnal.");
     }
+
+    /**
+     * Export jurnal ke CSV
+     */
+    public function export(Request $request)
+    {
+        $query = Jurnal::with(['siswa.siswaProfile.jurusan', 'siswa.siswaProfile.pembimbing']);
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('tanggal', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('tanggal', '<=', $request->end_date);
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('jurusan_id')) {
+            $query->whereHas('siswa.siswaProfile', function($q) use ($request) {
+                $q->where('jurusan_id', $request->jurusan_id);
+            });
+        }
+
+        $jurnals = $query->latest('tanggal')->get();
+        $filename = "Export_Jurnal_" . date('Ymd_His') . ".csv";
+
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Cache-Control'       => 'no-cache, no-store, must-revalidate',
+            'Pragma'              => 'no-cache',
+            'Expires'             => '0',
+        ];
+
+        $callback = function () use ($jurnals) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM for excel
+
+            fputcsv($file, [
+                'No',
+                'Tanggal',
+                'Nama Siswa',
+                'NIS',
+                'Jurusan',
+                'Pembimbing',
+                'Kegiatan',
+                'Status'
+            ]);
+
+            $no = 1;
+            foreach ($jurnals as $j) {
+                fputcsv($file, [
+                    $no++,
+                    $j->tanggal->format('Y-m-d'),
+                    $j->siswa->name ?? '-',
+                    $j->siswa->siswaProfile->nis ?? '-',
+                    $j->siswa->siswaProfile->jurusan->nama ?? '-',
+                    $j->siswa->siswaProfile->pembimbing->name ?? '-',
+                    $j->kegiatan,
+                    strtoupper($j->status)
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }

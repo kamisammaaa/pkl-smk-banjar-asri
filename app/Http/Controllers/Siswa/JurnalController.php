@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
+use App\Models\Absensi;
 use App\Models\Jurnal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,8 +18,30 @@ class JurnalController extends Controller
         $jurnals = Jurnal::where('siswa_user_id', Auth::id())
             ->latest()
             ->paginate(10);
+
+        // Cek apakah siswa sudah mengisi jurnal hari ini
+        $sudahIsiHariIni = Jurnal::where('siswa_user_id', Auth::id())
+            ->whereDate('tanggal', today())
+            ->exists();
+
+        $jurnalHariIni = $sudahIsiHariIni
+            ? Jurnal::where('siswa_user_id', Auth::id())
+                ->whereDate('tanggal', today())
+                ->first()
+            : null;
+
+        // Ambil absensi hari ini untuk keterangan status jurnal
+        $absensiHariIni = Absensi::where('siswa_user_id', Auth::id())
+            ->whereDate('tanggal', today())
+            ->first();
             
-        return view('siswa.jurnal.index', compact('jurnals'));
+        // Ambil jurnal terakhir (untuk fitur auto-fill kegiatan)
+        $jurnalTerakhir = Jurnal::where('siswa_user_id', Auth::id())
+            ->whereDate('tanggal', '<', today()) // yang bukan hari ini
+            ->latest('tanggal')
+            ->first();
+            
+        return view('siswa.jurnal.index', compact('jurnals', 'sudahIsiHariIni', 'jurnalHariIni', 'absensiHariIni', 'jurnalTerakhir'));
     }
 
     /**
@@ -29,6 +52,35 @@ class JurnalController extends Controller
         $error = $this->checkPeriodePKL();
         if ($error) {
             return back()->with('error', $error);
+        }
+
+        // Cek absensi hari ini — jurnal hanya bisa diisi jika status hadir atau terlambat
+        $absensiHariIni = \App\Models\Absensi::where('siswa_user_id', Auth::id())
+            ->whereDate('tanggal', today())
+            ->first();
+
+        if (!$absensiHariIni) {
+            return back()->with('error', '⚠️ Anda harus mengisi absensi terlebih dahulu sebelum mengisi jurnal.');
+        }
+
+        if (!in_array($absensiHariIni->status, ['hadir', 'terlambat'])) {
+            $labelStatus = match($absensiHariIni->status) {
+                'sakit'  => 'sakit',
+                'izin'   => 'izin',
+                'libur'  => 'libur',
+                'alpha'  => 'alpha',
+                default  => $absensiHariIni->status,
+            };
+            return back()->with('error', "⚠️ Jurnal tidak dapat diisi karena status kehadiran Anda hari ini adalah \"$labelStatus\". Jurnal hanya dapat diisi saat hadir atau terlambat.");
+        }
+
+        // Cek apakah siswa sudah mengisi jurnal hari ini
+        $sudahIsiHariIni = Jurnal::where('siswa_user_id', Auth::id())
+            ->whereDate('tanggal', today())
+            ->exists();
+
+        if ($sudahIsiHariIni) {
+            return back()->with('error', '⚠️ Anda sudah mengisi jurnal untuk hari ini. Jurnal hanya dapat diisi satu kali per hari.');
         }
 
         // Validasi input

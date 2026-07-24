@@ -71,30 +71,34 @@ class NilaiController extends Controller
             ->whereBetween('tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
             ->get();
 
-        $hadirOnTime = $absensis->where('status', 'hadir')->where('is_verified', true)->filter(function($a) {
-            return !$a->check_in || Carbon::parse($a->check_in)->format('H:i:s') <= '07:30:00';
-        })->count();
+        // Gunakan is_late yang sudah dihitung berdasarkan jam_masuk perusahaan saat check-in
+        $hadirVerified = $absensis->where('status', 'hadir')->where('is_verified', true);
+        $hadirOnTime = $hadirVerified->where('is_late', false)->count();
+        $hadirLate   = $hadirVerified->where('is_late', true)->count();
 
-        $hadirLate = $absensis->where('status', 'hadir')->where('is_verified', true)->filter(function($a) {
-            return $a->check_in && Carbon::parse($a->check_in)->format('H:i:s') > '07:30:00';
-        })->count();
-
-        $sakit = $absensis->where('status', 'sakit')->where('is_verified', true)->count();
-        $izin = $absensis->where('status', 'izin')->where('is_verified', true)->count();
-        $alpha = $absensis->where('status', 'alpha')->count();
+        $sakit    = $absensis->where('status', 'sakit')->where('is_verified', true)->count();
+        $izin     = $absensis->where('status', 'izin')->where('is_verified', true)->count();
+        $libur    = $absensis->where('status', 'libur')->count();
+        $alpha    = $absensis->where('status', 'alpha')->count();
         $totalDays = $absensis->count();
 
-        // Formula: (hadirOnTime*100 + hadirLate*70 + (sakit + izin)*100 + alpha*0) / totalDays
+        // Hari aktif = total - libur (konsisten dengan LaporanController)
+        $hariAktif = max($totalDays - $libur, 1);
+
+        // Formula: (hadir*100 + terlambat*70 + (izin+sakit)*100 + alpha*0) / hariAktif
         $nilaiAbsensi = $totalDays > 0
-            ? round((($hadirOnTime * 100) + ($hadirLate * 70) + (($sakit + $izin) * 100)) / $totalDays)
+            ? round((($hadirOnTime * 100) + ($hadirLate * 70) + (($sakit + $izin) * 100)) / $hariAktif)
             : 0;
             
         // Cap nilai maksimal di 100
         $nilaiAbsensi = min(max($nilaiAbsensi, 0), 100);
 
-        // 5. 📚 Hitung Nilai Jurnal (berdasarkan hari aktif)
+        // 5. 📚 Hitung Nilai Jurnal
+        // Jurnal wajib dikerjakan pada hari hadir + terlambat + alpha.
+        // (Libur, sakit, dan izin tidak dihitung sebagai kewajiban jurnal.)
+        $hariMasuk = $hadirOnTime + $hadirLate + $alpha;
         $jurnalDisetujui = $siswa->jurnals->where('status', 'disetujui');
-        $nilaiJurnal = $this->penilaianService->calculateNilaiJurnal($jurnalDisetujui, max($totalWorkingDays, 1));
+        $nilaiJurnal = $this->penilaianService->calculateNilaiJurnal($jurnalDisetujui, max($hariMasuk, 1));
 
         // 6. 🎯 Ambil Data Penilaian Terakhir (jika ada)
         $penilaian = PenilaianAkhir::where('siswa_user_id', $siswa->id)

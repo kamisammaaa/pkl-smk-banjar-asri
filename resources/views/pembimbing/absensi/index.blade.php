@@ -85,11 +85,32 @@
     </div>
 
     {{-- 📋 Table Absensi --}}
+    <div class="mb-4 flex gap-2 hidden" id="bulkActions">
+        <form action="{{ route('pembimbing.absensi.bulk-verify') }}" method="POST" id="formBulkVerify" class="inline">
+            @csrf
+            <input type="hidden" name="absensi_ids" id="verify_ids">
+            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm transition">
+                ✅ Setujui Terpilih (<span id="countVerify">0</span>)
+            </button>
+        </form>
+        <form action="{{ route('pembimbing.absensi.bulk-reject') }}" method="POST" id="formBulkReject" class="inline">
+            @csrf
+            <input type="hidden" name="absensi_ids" id="reject_ids">
+            <input type="hidden" name="keterangan" id="reject_keterangan">
+            <button type="button" onclick="promptBulkReject()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm transition">
+                ❌ Tolak Terpilih
+            </button>
+        </form>
+    </div>
+
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm min-w-[950px]">
                 <thead class="bg-gray-50 border-b">
                     <tr>
+                        <th class="px-4 py-3 font-semibold text-gray-700 w-10 text-center">
+                            <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                        </th>
                         <th class="px-4 py-3 font-semibold text-gray-700">Tanggal</th>
                         <th class="px-4 py-3 font-semibold text-gray-700">Siswa</th>
                         <th class="px-4 py-3 font-semibold text-gray-700">Status</th>
@@ -102,6 +123,13 @@
                     @forelse($absensis as $a)
                     <tr class="hover:bg-gray-50 transition {{ !$a->is_verified && $a->status !== 'alpha' ? 'bg-amber-50/30' : '' }}">
                         
+                        {{-- Checkbox Bulk --}}
+                        <td class="px-4 py-3 text-center">
+                            @if($a->status !== 'alpha' && !$a->is_verified)
+                                <input type="checkbox" class="bulk-cb rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" value="{{ $a->id }}">
+                            @endif
+                        </td>
+
                         {{-- Tanggal --}}
                         <td class="px-4 py-3 text-gray-800">
                             <span class="font-medium">{{ $a->tanggal->format('d/m/Y') }}</span>
@@ -276,3 +304,58 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.bulk-cb');
+    const bulkActions = document.getElementById('bulkActions');
+    const countVerify = document.getElementById('countVerify');
+    const verifyIds = document.getElementById('verify_ids');
+    const rejectIds = document.getElementById('reject_ids');
+    const rejectKeterangan = document.getElementById('reject_keterangan');
+    const formBulkVerify = document.getElementById('formBulkVerify');
+    const formBulkReject = document.getElementById('formBulkReject');
+
+    function updateBulkActions() {
+        const checked = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+        if (checked.length > 0) {
+            bulkActions.classList.remove('hidden');
+            countVerify.innerText = checked.length;
+            verifyIds.value = checked.join(',');
+            rejectIds.value = checked.join(',');
+        } else {
+            bulkActions.classList.add('hidden');
+        }
+    }
+
+    if(selectAll) {
+        selectAll.addEventListener('change', (e) => {
+            checkboxes.forEach(cb => cb.checked = e.target.checked);
+            updateBulkActions();
+        });
+    }
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateBulkActions);
+    });
+
+    if(formBulkVerify) {
+        formBulkVerify.addEventListener('submit', (e) => {
+            if(!confirm('Anda yakin ingin menyetujui data yang dipilih?')) {
+                e.preventDefault();
+            }
+        });
+    }
+
+    window.promptBulkReject = function() {
+        const reason = prompt('Masukkan alasan penolakan untuk data yang dipilih:');
+        if(reason !== null && reason.trim() !== '') {
+            rejectKeterangan.value = reason;
+            formBulkReject.submit();
+        }
+    };
+});
+</script>
+@endpush

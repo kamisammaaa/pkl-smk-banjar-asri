@@ -42,7 +42,22 @@ class KunjunganController extends Controller
             ->orderBy('nama')
             ->get();
 
-        return view('pembimbing.kunjungan.index', compact('kunjungans', 'perusahaanBinaan'));
+        // 📅 Data untuk FullCalendar (Unpaginated)
+        $allKunjungans = Kunjungan::where('pembimbing_id', Auth::id())
+            ->with(['perusahaan'])
+            ->get();
+            
+        $calendarEvents = $allKunjungans->map(function($k) {
+            return [
+                'title' => $k->perusahaan->nama ?? 'Perusahaan Tidak Diketahui',
+                'start' => $k->tanggal->format('Y-m-d'),
+                'url' => route('pembimbing.kunjungan.edit', $k->id),
+                // Warna hijau (#10B981) jika selesai, biru (#3B82F6) jika masih rencana
+                'color' => $k->status === 'selesai' ? '#10B981' : '#3B82F6', 
+            ];
+        });
+
+        return view('pembimbing.kunjungan.index', compact('kunjungans', 'perusahaanBinaan', 'calendarEvents'));
     }
 
     /**

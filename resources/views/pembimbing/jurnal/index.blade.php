@@ -52,11 +52,27 @@
         </form>
     </div>
 
+    {{-- Bulk Actions --}}
+    <div class="mb-4 flex gap-2 hidden items-center bg-white p-3 rounded-xl shadow-sm border border-gray-200" id="bulkActions">
+        <form action="{{ route('pembimbing.jurnal.bulk-approve') }}" method="POST" id="formBulkApprove" class="flex flex-wrap gap-3 items-center w-full">
+            @csrf
+            <input type="hidden" name="jurnal_ids" id="approve_ids">
+            <span class="text-sm font-medium text-gray-700">Setujui <span id="countApprove" class="font-bold text-blue-600">0</span> jurnal terpilih dengan nilai:</span>
+            <input type="number" name="nilai" min="0" max="100" value="85" required class="border border-gray-300 rounded-lg px-2 py-1.5 text-sm w-20 focus:ring-2 focus:ring-blue-200 focus:border-blue-500">
+            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm transition">
+                ✅ Setujui Massal
+            </button>
+        </form>
+    </div>
+
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-[720px] w-full text-sm text-left">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
+                        <th class="px-3 py-3 sm:px-4 font-semibold text-gray-700 w-10 text-center">
+                            <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                        </th>
                         <th class="px-3 py-3 sm:px-4 font-semibold text-gray-700 w-[13%]">Tanggal</th>
                         <th class="px-3 py-3 sm:px-4 font-semibold text-gray-700 w-[20%]">Siswa</th>
                         <th class="px-3 py-3 sm:px-4 font-semibold text-gray-700 w-[42%]">Ringkasan</th>
@@ -80,6 +96,11 @@
                         $preview = \Illuminate\Support\Str::limit(strip_tags($j->kegiatan), 90);
                     @endphp
                     <tr class="hover:bg-gray-50 transition align-top">
+                        <td class="px-3 py-3 sm:px-4 text-center">
+                            @if($j->status !== 'disetujui')
+                                <input type="checkbox" class="bulk-cb rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" value="{{ $j->id }}">
+                            @endif
+                        </td>
                         <td class="px-3 py-3 sm:px-4 text-gray-700 whitespace-nowrap">
                             <div class="font-medium text-[13px] sm:text-sm">{{ $j->tanggal->locale('id')->isoFormat('D MMM Y') }}</div>
                             <div class="text-[10px] sm:text-[11px] text-gray-400">{{ $j->tanggal->locale('id')->isoFormat('dddd') }}</div>
@@ -110,7 +131,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-12 text-center">
+                        <td colspan="6" class="px-4 py-12 text-center">
                             <div class="text-gray-400 mb-2 text-3xl">📭</div>
                             <p class="text-gray-500 font-medium">Tidak ada jurnal yang perlu ditinjau.</p>
                         </td>
@@ -228,6 +249,45 @@
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.bulk-cb');
+    const bulkActions = document.getElementById('bulkActions');
+    const countApprove = document.getElementById('countApprove');
+    const approveIds = document.getElementById('approve_ids');
+    const formBulkApprove = document.getElementById('formBulkApprove');
+
+    function updateBulkActions() {
+        const checked = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+        if (checked.length > 0) {
+            bulkActions.classList.remove('hidden');
+            countApprove.innerText = checked.length;
+            approveIds.value = checked.join(',');
+        } else {
+            bulkActions.classList.add('hidden');
+        }
+    }
+
+    if(selectAll) {
+        selectAll.addEventListener('change', (e) => {
+            checkboxes.forEach(cb => cb.checked = e.target.checked);
+            updateBulkActions();
+        });
+    }
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateBulkActions);
+    });
+
+    if(formBulkApprove) {
+        formBulkApprove.addEventListener('submit', (e) => {
+            if(!confirm('Anda yakin ingin menyetujui jurnal yang dipilih dengan nilai tersebut?')) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+
 function toggleCatatanRevisi(id, value) {
     const el = document.getElementById('catatan-' + id);
     if (value === 'revisi') {

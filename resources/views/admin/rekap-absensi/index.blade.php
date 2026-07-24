@@ -72,7 +72,8 @@
                         <th class="px-4 py-3 font-semibold">Jurusan</th>
                         <th class="px-4 py-3 font-semibold">Pembimbing</th>
                         <th class="px-4 py-3 text-center font-semibold text-green-700 bg-green-50">✅ Hadir</th>
-                        <th class="px-4 py-3 text-center font-semibold text-yellow-700 bg-yellow-50">🤒 Sakit</th>
+                        <th class="px-4 py-3 text-center font-semibold text-yellow-600 bg-yellow-50">⏰ Terlambat</th>
+                        <th class="px-4 py-3 text-center font-semibold text-orange-700 bg-orange-50">🤒 Sakit</th>
                         <th class="px-4 py-3 text-center font-semibold text-blue-700 bg-blue-50">📝 Izin</th>
                         <th class="px-4 py-3 text-center font-semibold text-purple-700 bg-purple-50">🏖️ Libur</th>
                         <th class="px-4 py-3 text-center font-semibold text-red-700 bg-red-50">❌ Alpha</th>
@@ -87,7 +88,8 @@
                         <td class="px-4 py-3 text-gray-600">{{ $r['siswa']->siswaProfile?->jurusan?->nama ?? '-' }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $r['siswa']->siswaProfile?->pembimbing?->name ?? '-' }}</td>
                         <td class="px-4 py-3 text-center bg-green-50 font-bold text-green-700">{{ $r['hadir'] }}</td>
-                        <td class="px-4 py-3 text-center bg-yellow-50">{{ $r['sakit'] }}</td>
+                        <td class="px-4 py-3 text-center bg-yellow-50 font-bold text-yellow-700">{{ $r['terlambat'] }}</td>
+                        <td class="px-4 py-3 text-center bg-orange-50">{{ $r['sakit'] }}</td>
                         <td class="px-4 py-3 text-center bg-blue-50">{{ $r['izin'] }}</td>
                         <td class="px-4 py-3 text-center bg-purple-50 text-purple-700">{{ $r['libur'] }}</td>
                         <td class="px-4 py-3 text-center bg-red-50 font-bold text-red-700">{{ $r['alpha'] }}</td>
@@ -110,7 +112,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="10" class="px-4 py-8 text-center text-gray-500">
+                        <td colspan="11" class="px-4 py-8 text-center text-gray-500">
                             <div class="text-gray-400 mb-2 text-3xl">📭</div>
                             <p>Tidak ada data rekap absensi</p>
                             @if(request('bulan') || request('pembimbing_id') || request('jurusan_id'))
@@ -128,8 +130,10 @@
     <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg text-sm text-blue-700">
         <strong>💡 Keterangan:</strong>
         <ul class="list-disc list-inside mt-1 space-y-0.5">
+            <li><strong>Hadir</strong> = Hadir tepat waktu (sebelum batas jam masuk + toleransi industri)</li>
+            <li><strong>Terlambat</strong> = Hadir namun melewati jam masuk + toleransi industri</li>
             <li><strong>Hari Aktif</strong> = Total hari absensi dikurangi hari Libur 🏖️</li>
-            <li><strong>% Hadir</strong> = (Hadir terverifikasi ÷ Hari Aktif) × 100</li>
+            <li><strong>% Hadir</strong> = (Hadir + Terlambat ÷ Hari Aktif) × 100</li>
             <li>Hari <strong>Libur</strong> tidak dihitung sebagai hari aktif sehingga tidak mempengaruhi persentase kehadiran</li>
             <li>Filter yang aktif diterapkan juga pada hasil Export CSV</li>
         </ul>

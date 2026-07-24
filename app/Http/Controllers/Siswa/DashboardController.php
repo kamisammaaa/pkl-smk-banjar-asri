@@ -24,6 +24,61 @@ class DashboardController extends Controller
         $bulanIni = now()->format('Y-m');
 
         // ========================================
+        // 0. PROGRESS PKL & SMART REMINDERS
+        // ========================================
+        $progress = [
+            'persentase' => 0,
+            'hari_berjalan' => 0,
+            'total_hari' => 0,
+            'isActive' => false
+        ];
+        
+        $periode = $profile?->perusahaan?->periodePKL;
+        if ($periode && $periode->is_active) {
+            $start = Carbon::parse($periode->tanggal_mulai)->startOfDay();
+            $end = Carbon::parse($periode->tanggal_selesai)->startOfDay();
+            $today = now()->startOfDay();
+            
+            $totalHari = (int) $start->diffInDays($end) + 1;
+            $progress['total_hari'] = $totalHari;
+            $progress['isActive'] = true;
+            
+            if ($today->lt($start)) {
+                $progress['persentase'] = 0;
+                $progress['hari_berjalan'] = 0;
+            } elseif ($today->gt($end)) {
+                $progress['persentase'] = 100;
+                $progress['hari_berjalan'] = $totalHari;
+            } else {
+                $hariBerjalan = (int) $start->diffInDays($today) + 1;
+                $progress['hari_berjalan'] = $hariBerjalan;
+                $progress['persentase'] = min(100, round(($hariBerjalan / $totalHari) * 100));
+            }
+        }
+        
+        // Smart Reminders
+        $belumAbsen = false;
+        $belumJurnal = false;
+        
+        $absensiHariIni = Absensi::where('siswa_user_id', $user->id)
+            ->whereDate('tanggal', today())
+            ->first();
+            
+        if (!$absensiHariIni) {
+            $belumAbsen = true;
+        } else {
+            // Check if they need to fill journal (hadir/terlambat)
+            if (in_array($absensiHariIni->status, ['hadir', 'terlambat'])) {
+                $sudahJurnal = Jurnal::where('siswa_user_id', $user->id)
+                    ->whereDate('tanggal', today())
+                    ->exists();
+                if (!$sudahJurnal) {
+                    $belumJurnal = true;
+                }
+            }
+        }
+
+        // ========================================
         // 1. PENGUMUMAN DARI ADMIN
         // ========================================
         $pengumuman = \App\Models\Pengumuman::query()
@@ -82,20 +137,16 @@ class DashboardController extends Controller
             ->where('tanggal', 'like', "{$bulanIni}%")
             ->get();
 
-        // Asumsi jam masuk normal: 07:30
+        // Gunakan is_late yang sudah dihitung berdasarkan jam_masuk perusahaan saat check-in
+        $hadirVerified = $absensiBulanIni->where('status', 'hadir')->where('is_verified', true);
         $statsAbsensi = [
-            'hadir' => $absensiBulanIni->where('status', 'hadir')
-                ->where('is_verified', true)
-                ->where('check_in', '<=', '07:30:00')
-                ->count(),
-            'terlambat' => $absensiBulanIni->where('status', 'hadir')
-                ->where('is_verified', true)
-                ->where('check_in', '>', '07:30:00')
-                ->count(),
-            'izin' => $absensiBulanIni->where('status', 'izin')->count(),
-            'sakit' => $absensiBulanIni->where('status', 'sakit')->count(),
-            'alpha' => $absensiBulanIni->where('status', 'alpha')->count(),
-            'total' => $absensiBulanIni->count(),
+            'hadir'     => $hadirVerified->where('is_late', false)->count(),
+            'terlambat' => $hadirVerified->where('is_late', true)->count(),
+            'izin'      => $absensiBulanIni->where('status', 'izin')->count(),
+            'sakit'     => $absensiBulanIni->where('status', 'sakit')->count(),
+            'libur'     => $absensiBulanIni->where('status', 'libur')->count(),
+            'alpha'     => $absensiBulanIni->where('status', 'alpha')->count(),
+            'total'     => $absensiBulanIni->count(),
         ];
 
         // ========================================
@@ -129,7 +180,10 @@ class DashboardController extends Controller
             'kunjunganMendatang',
             'statsAbsensi',
             'statsJurnal',
-            'infoSiswa'
+            'infoSiswa',
+            'progress',
+            'belumAbsen',
+            'belumJurnal'
         ));
     }
 }

@@ -75,6 +75,41 @@ class JurnalController extends Controller
         return back()->with('success', $msg);
     }
 
+    public function bulkApprove(Request $request)
+    {
+        $request->validate([
+            'jurnal_ids' => 'required|string',
+            'nilai' => 'required|integer|min:0|max:100'
+        ]);
+
+        $ids = explode(',', $request->jurnal_ids);
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada jurnal yang dipilih.');
+        }
+
+        $pembimbingId = Auth::id();
+        $count = 0;
+        $nilai = $request->nilai;
+
+        foreach ($ids as $id) {
+            $jurnal = Jurnal::with('siswa.siswaProfile')->find($id);
+            if ($jurnal) {
+                $profile = $jurnal->siswa->siswaProfile ?? null;
+                // Pastikan milik pembimbing ini dan belum disetujui (atau disetujui tapi mau diupdate nilainya massal)
+                if ($profile && $profile->pembimbing_id === $pembimbingId) {
+                    $jurnal->update([
+                        'status' => 'disetujui',
+                        'nilai' => $nilai,
+                        'catatan_revisi' => null, // Hapus catatan revisi jika ada
+                    ]);
+                    $count++;
+                }
+            }
+        }
+
+        return back()->with('success', "✅ Berhasil menyetujui {$count} jurnal dengan nilai {$nilai}.");
+    }
+
     public function edit(Jurnal $jurnal)
     {
         $profile = $jurnal->siswa->siswaProfile;

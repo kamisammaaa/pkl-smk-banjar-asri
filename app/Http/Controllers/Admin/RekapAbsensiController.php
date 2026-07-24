@@ -44,22 +44,25 @@ class RekapAbsensiController extends Controller
         foreach ($siswaList as $s) {
             $absenBulan = $allAbsensi->get($s->id, collect());
 
-            $hadir      = $absenBulan->where('status', 'hadir')->where('is_verified', true)->count();
+            $hadirVerified = $absenBulan->where('status', 'hadir')->where('is_verified', true);
+            // Gunakan is_late konsisten dengan panel pembimbing
+            $hadir      = $hadirVerified->where('is_late', false)->count();
+            $terlambat  = $hadirVerified->where('is_late', true)->count();
             $sakit      = $absenBulan->where('status', 'sakit')->where('is_verified', true)->count();
             $izin       = $absenBulan->where('status', 'izin')->where('is_verified', true)->count();
             $libur      = $absenBulan->where('status', 'libur')->where('is_verified', true)->count();
             $alpha      = $absenBulan->where('status', 'alpha')->count();
-            $total_hari = $hadir + $sakit + $izin + $libur + $alpha; // Hanya hitung yang verified dan alpha
-
+            $total_hari = $hadir + $terlambat + $sakit + $izin + $libur + $alpha;
 
             // Hari aktif = total - libur (libur tidak dihitung dalam pembagi persentase)
             $hariAktif  = $total_hari - $libur;
-            // Persentase kehadiran berbasis hari aktif (bukan total hari)
-            $persentase = $hariAktif > 0 ? round(($hadir / $hariAktif) * 100, 1) : 0;
+            // Persentase kehadiran: (hadir + terlambat) / hari aktif — konsisten dengan panel pembimbing
+            $persentase = $hariAktif > 0 ? round((($hadir + $terlambat) / $hariAktif) * 100, 1) : 0;
 
             $rekap[] = [
                 'siswa'      => $s,
                 'hadir'      => $hadir,
+                'terlambat'  => $terlambat,
                 'sakit'      => $sakit,
                 'izin'       => $izin,
                 'libur'      => $libur,
@@ -129,7 +132,8 @@ class RekapAbsensiController extends Controller
                 'Jurusan',
                 'Pembimbing',
                 'Perusahaan PKL',
-                '✅ Hadir (Terverifikasi)',
+                '✅ Hadir (Tepat Waktu)',
+                '⏰ Terlambat',
                 '🤒 Sakit',
                 '📝 Izin',
                 '🏖️ Libur',
@@ -144,15 +148,18 @@ class RekapAbsensiController extends Controller
             foreach ($siswaList as $s) {
                 $absenBulan = $allAbsensi->get($s->id, collect());
 
-                $hadir      = $absenBulan->where('status', 'hadir')->where('is_verified', true)->count();
+                $hadirVerified = $absenBulan->where('status', 'hadir')->where('is_verified', true);
+                // Gunakan is_late konsisten dengan panel pembimbing
+                $hadir      = $hadirVerified->where('is_late', false)->count();
+                $terlambat  = $hadirVerified->where('is_late', true)->count();
                 $sakit      = $absenBulan->where('status', 'sakit')->where('is_verified', true)->count();
                 $izin       = $absenBulan->where('status', 'izin')->where('is_verified', true)->count();
                 $libur      = $absenBulan->where('status', 'libur')->where('is_verified', true)->count();
                 $alpha      = $absenBulan->where('status', 'alpha')->count();
-                $total      = $hadir + $sakit + $izin + $libur + $alpha; // Hanya hitung yang verified dan alpha
+                $total      = $hadir + $terlambat + $sakit + $izin + $libur + $alpha;
 
                 $hariAktif  = $total - $libur;
-                $persentase = $hariAktif > 0 ? round(($hadir / $hariAktif) * 100, 1) : 0;
+                $persentase = $hariAktif > 0 ? round((($hadir + $terlambat) / $hariAktif) * 100, 1) : 0;
 
                 $keterangan = match(true) {
                     $persentase >= 90 => 'Sangat Baik',
@@ -170,6 +177,7 @@ class RekapAbsensiController extends Controller
                     $s->siswaProfile?->pembimbing?->name ?? '-',
                     $s->siswaProfile?->perusahaan?->nama ?? '-',
                     $hadir,
+                    $terlambat,
                     $sakit,
                     $izin,
                     $libur,

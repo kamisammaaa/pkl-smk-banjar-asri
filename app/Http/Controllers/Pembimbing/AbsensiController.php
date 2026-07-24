@@ -111,6 +111,80 @@ class AbsensiController extends Controller
     }
 
     /**
+     * Setujui massal absensi siswa.
+     */
+    public function bulkVerify(Request $request)
+    {
+        $request->validate([
+            'absensi_ids' => 'required|string'
+        ]);
+
+        $ids = explode(',', $request->absensi_ids);
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada data yang dipilih.');
+        }
+
+        $pembimbingId = Auth::id();
+        $count = 0;
+
+        foreach ($ids as $id) {
+            $absensi = Absensi::with('siswa.siswaProfile')->find($id);
+            if ($absensi) {
+                $profile = $absensi->siswa->siswaProfile ?? null;
+                // Pastikan milik pembimbing ini, belum diverifikasi, dan bukan alpha
+                if ($profile && $profile->pembimbing_id === $pembimbingId && !$absensi->is_verified && $absensi->status !== 'alpha') {
+                    $absensi->update([
+                        'is_verified' => true,
+                        'verified_by' => $pembimbingId,
+                        'verified_at' => now(),
+                    ]);
+                    $count++;
+                }
+            }
+        }
+
+        return back()->with('success', "✅ Berhasil memverifikasi {$count} data absensi.");
+    }
+
+    /**
+     * Tolak massal absensi siswa.
+     */
+    public function bulkReject(Request $request)
+    {
+        $request->validate([
+            'absensi_ids' => 'required|string',
+            'keterangan' => 'nullable|string'
+        ]);
+
+        $ids = explode(',', $request->absensi_ids);
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada data yang dipilih.');
+        }
+
+        $pembimbingId = Auth::id();
+        $count = 0;
+        $keterangan = $request->keterangan ?? 'Ditolak secara massal oleh pembimbing';
+
+        foreach ($ids as $id) {
+            $absensi = Absensi::with('siswa.siswaProfile')->find($id);
+            if ($absensi) {
+                $profile = $absensi->siswa->siswaProfile ?? null;
+                if ($profile && $profile->pembimbing_id === $pembimbingId && $absensi->status !== 'alpha') {
+                    $absensi->update([
+                        'is_verified' => false,
+                        'verified_by' => null,
+                        'verified_at' => null,
+                        'keterangan_status' => $keterangan,
+                    ]);
+                    $count++;
+                }
+            }
+        }
+
+        return back()->with('success', "❌ Berhasil menolak/mengembalikan {$count} data absensi ke pending.");
+    }
+
+    /**
      * Ekspor Data Absensi Siswa Binaan ke Format CSV
      */
     public function export(Request $request): StreamedResponse

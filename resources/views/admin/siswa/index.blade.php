@@ -117,11 +117,44 @@
     </div>
 
     <!-- Desktop Table -->
-    <div class="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mt-6">
+        <form action="{{ route('admin.siswa.bulk-assign') }}" method="POST" id="bulkForm">
+            @csrf
+            
+            <!-- Bulk Action Bar -->
+            <div class="bg-indigo-50 border-b border-indigo-100 p-4 flex flex-wrap items-end gap-3 shadow-sm">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-xs font-bold text-indigo-800 mb-1 uppercase tracking-wider">Set Pembimbing Massal</label>
+                    <select name="pembimbing_id" class="w-full border border-indigo-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-300">
+                        <option value="">-- Biarkan (Tidak Diubah) --</option>
+                        @foreach($pembimbingList as $p)
+                        <option value="{{ $p->id }}">{{ $p->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-xs font-bold text-indigo-800 mb-1 uppercase tracking-wider">Set Perusahaan Massal</label>
+                    <select name="perusahaan_id" class="w-full border border-indigo-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-300">
+                        <option value="">-- Biarkan (Tidak Diubah) --</option>
+                        @foreach($perusahaanList as $p)
+                        <option value="{{ $p->id }}">{{ $p->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" onclick="return confirm('Apakah Anda yakin ingin melakukan assign massal pada siswa yang dicentang?')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg shadow-sm font-bold text-sm h-[38px] active:scale-95 transition flex items-center gap-2">
+                        <span>⚡</span> Terapkan
+                    </button>
+                </div>
+            </div>
+
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm min-w-[900px]">
                 <thead class="bg-gray-50 border-b">
                     <tr>
+                        <th class="px-4 py-3 font-semibold text-gray-700 w-12 text-center">
+                            <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                        </th>
                         <th class="px-4 py-3 font-semibold text-gray-700">Siswa</th>
                         <th class="px-4 py-3 font-semibold text-gray-700">NIS</th>
                         <th class="px-4 py-3 font-semibold text-gray-700">Jurusan</th>
@@ -134,6 +167,11 @@
                     @forelse($siswa as $s)
                     @php $profile = $s->siswaProfile; @endphp
                     <tr class="hover:bg-gray-50">
+                        <!-- Checkbox -->
+                        <td class="px-4 py-3 text-center">
+                            <input type="checkbox" name="siswa_ids[]" value="{{ $s->id }}" class="siswa-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                        </td>
+                        
                         <!-- Nama & Email -->
                         <td class="px-4 py-3">
                             <div class="font-medium text-gray-800">{{ $s->name }}</div>
@@ -187,7 +225,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-12 text-center">
+                        <td colspan="7" class="px-4 py-12 text-center">
                             <div class="text-gray-400 mb-2 text-3xl">🔍</div>
                             <p class="text-gray-500 font-medium">Tidak ada data siswa yang cocok dengan filter.</p>
                             @if(request('search') || request('jurusan_id') || request('pembimbing_status') || request('perusahaan_status') || request('perusahaan_id'))
@@ -199,6 +237,7 @@
                 </tbody>
             </table>
         </div>
+        </form>
     </div>
 
     <!-- Mobile Card View -->
@@ -292,10 +331,25 @@
             </div>
             <div class="ml-3">
                 <p class="text-sm text-blue-700">
-                    <strong>💡 Tips:</strong> Gunakan filter "Belum di-assign" untuk cepat menemukan siswa yang perlu ditempatkan. Klik tombol <strong>Assign</strong> untuk mengatur jurusan, perusahaan, dan pembimbing.
+                    <strong>💡 Tips:</strong> Gunakan filter "Belum di-assign" untuk menemukan siswa yang perlu ditempatkan. Centang siswa pada tabel, lalu gunakan fitur <strong>Set Massal</strong> di atas tabel.
                 </p>
             </div>
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectAll = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll('.siswa-checkbox');
+        
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            });
+        }
+    });
+</script>
+@endpush
 @endsection

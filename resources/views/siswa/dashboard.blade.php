@@ -221,8 +221,55 @@
                     <p class="text-xl font-black text-slate-900">Cek</p>
                 </div>
             </a>
- 
         </div>
+    </div>
+
+    {{-- PROGRESS & SMART REMINDERS --}}
+    <div class="space-y-4 fade-in fade-in-2">
+        @if(isset($progress) && $progress['isActive'])
+        <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200">
+            <div class="flex justify-between items-end mb-3">
+                <div class="flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-emerald-500 text-white flex items-center justify-center text-sm shadow-sm">🚀</span>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Progress Masa PKL</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Telah berjalan <strong>{{ $progress['hari_berjalan'] }} hari</strong> dari total {{ $progress['total_hari'] }} hari</p>
+                    </div>
+                </div>
+                <span class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-emerald-600">{{ $progress['persentase'] }}%</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-4 border border-slate-200 overflow-hidden relative">
+                <div class="bg-gradient-to-r from-blue-500 to-emerald-500 h-full rounded-full transition-all duration-1000 relative overflow-hidden" style="width: {{ $progress['persentase'] }}%">
+                    <!-- Shimmer effect -->
+                    <div class="absolute top-0 left-0 w-full h-full bg-white opacity-20 transform -skew-x-12 animate-[shimmer_2s_infinite]"></div>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        @if(isset($belumAbsen) && $belumAbsen)
+        <div class="bg-red-50 border border-red-200 p-5 rounded-3xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2">
+            <div class="flex items-start sm:items-center gap-3">
+                <span class="text-3xl animate-bounce">⚠️</span>
+                <div>
+                    <p class="font-bold text-red-800 text-sm md:text-base">Perhatian: Anda belum absen hari ini!</p>
+                    <p class="text-xs text-red-600 mt-0.5 leading-relaxed">Segera isi absensi harian Anda sebelum terlambat agar tidak dihitung Alpha.</p>
+                </div>
+            </div>
+            <a href="{{ route('siswa.absensi.create') }}" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-6 py-3 rounded-2xl transition whitespace-nowrap shadow-sm active:scale-95 text-center">Isi Absen Sekarang</a>
+        </div>
+        @elseif(isset($belumJurnal) && $belumJurnal)
+        <div class="bg-amber-50 border border-amber-200 p-5 rounded-3xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2">
+            <div class="flex items-start sm:items-center gap-3">
+                <span class="text-3xl animate-bounce">📝</span>
+                <div>
+                    <p class="font-bold text-amber-800 text-sm md:text-base">Pengingat: Jangan lupa isi Jurnal Harian!</p>
+                    <p class="text-xs text-amber-700 mt-0.5 leading-relaxed">Anda sudah melakukan absensi, pastikan Anda juga mencatat kegiatan harian di Jurnal agar mendapatkan nilai maksimal.</p>
+                </div>
+            </div>
+            <a href="{{ route('siswa.jurnal.index') }}" class="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-6 py-3 rounded-2xl transition whitespace-nowrap shadow-sm active:scale-95 text-center">Isi Jurnal Sekarang</a>
+        </div>
+        @endif
     </div>
 
     {{-- INFO CARDS --}}
@@ -256,8 +303,10 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 fade-in fade-in-3">
         {{-- STATISTIK ABSENSI --}}
         @php
-            $totalAbsensi = max(1, $statsAbsensi['hadir'] + $statsAbsensi['terlambat'] + $statsAbsensi['izin'] + $statsAbsensi['sakit'] + $statsAbsensi['alpha']);
-            $hadirPct = round(($statsAbsensi['hadir'] / $totalAbsensi) * 100);
+            $hariAktifBulan = max(1, $statsAbsensi['total'] - $statsAbsensi['libur']);
+            // Persentase = (hadir tepat waktu + terlambat) / hari aktif — konsisten dengan laporan pembimbing
+            $hadirPct = round((($statsAbsensi['hadir'] + $statsAbsensi['terlambat']) / $hariAktifBulan) * 100);
+            $hadirPct = min($hadirPct, 100); // cap 100%
         @endphp
         <div class="section-card bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between min-h-[360px]">
             <div class="section-header rounded-t-3xl">
@@ -280,7 +329,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-5 gap-2 pt-1">
+                <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 pt-1">
                     <div class="att-badge bg-emerald-50 border border-emerald-100">
                         <div class="text-xl font-black text-emerald-600">{{ $statsAbsensi['hadir'] }}</div>
                         <div class="text-[9px] text-emerald-700 font-bold mt-0.5">Hadir</div>
@@ -296,6 +345,10 @@
                     <div class="att-badge bg-orange-50 border border-orange-100">
                         <div class="text-xl font-black text-orange-600">{{ $statsAbsensi['sakit'] }}</div>
                         <div class="text-[9px] text-orange-700 font-bold mt-0.5">Sakit</div>
+                    </div>
+                    <div class="att-badge bg-purple-50 border border-purple-100">
+                        <div class="text-xl font-black text-purple-600">{{ $statsAbsensi['libur'] }}</div>
+                        <div class="text-[9px] text-purple-700 font-bold mt-0.5">Libur</div>
                     </div>
                     <div class="att-badge bg-red-50 border border-red-100">
                         <div class="text-xl font-black text-red-600">{{ $statsAbsensi['alpha'] }}</div>

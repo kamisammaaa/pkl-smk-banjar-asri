@@ -95,8 +95,9 @@ class SiswaController extends Controller
         // Load data for filter dropdowns
         $jurusanList = \App\Models\Jurusan::orderBy('nama')->get();
         $perusahaanList = \App\Models\Perusahaan::orderBy('nama')->get();
+        $pembimbingList = \App\Models\User::where('role', 'pembimbing')->where('is_active', 1)->orderBy('name')->get();
 
-        return view('admin.siswa.index', compact('siswa', 'jurusanList', 'perusahaanList'));
+        return view('admin.siswa.index', compact('siswa', 'jurusanList', 'perusahaanList', 'pembimbingList'));
     }
     /**
      * Show form to edit/assign student
@@ -189,5 +190,54 @@ class SiswaController extends Controller
         return redirect()
             ->route('admin.siswa.index')
             ->with('success', "✅ Data siswa {$user->name} berhasil diupdate!");
+    }
+
+    /**
+     * Assign massal siswa ke pembimbing/perusahaan
+     */
+    public function bulkAssign(Request $request)
+    {
+        $request->validate([
+            'siswa_ids' => 'required|array|min:1',
+            'siswa_ids.*' => 'exists:users,id',
+            'pembimbing_id' => 'nullable|exists:users,id',
+            'perusahaan_id' => 'nullable|exists:perusahaan,id',
+        ]);
+
+        $count = 0;
+        
+        if (empty($request->pembimbing_id) && empty($request->perusahaan_id)) {
+            return back()->with('error', '❌ Pilih minimal Pembimbing atau Perusahaan untuk di-assign.');
+        }
+
+        foreach ($request->siswa_ids as $userId) {
+            // Cek apakah ini benar-benar siswa
+            $user = User::where('id', $userId)->where('role', 'siswa')->first();
+            if (!$user) continue;
+
+            $profile = SiswaProfile::firstOrNew(['user_id' => $user->id]);
+            
+            if (!empty($request->pembimbing_id)) {
+                $profile->pembimbing_id = $request->pembimbing_id;
+            }
+            if (!empty($request->perusahaan_id)) {
+                $profile->perusahaan_id = $request->perusahaan_id;
+            }
+            
+            // Dummy jurusan_id if doesn't exist to satisfy DB constraint if needed
+            if (!$profile->exists && !$profile->jurusan_id) {
+                // If they don't have a profile yet, they must at least have a valid jurusan
+                // But normally users are imported with a Jurusan. 
+                // Let's just try to save it, if it fails due to null jurusan, they must edit it individually.
+                $profile->jurusan_id = $profile->jurusan_id ?? Jurusan::first()->id;
+            }
+            
+            $profile->save();
+            $count++;
+        }
+
+        return redirect()
+            ->route('admin.siswa.index')
+            ->with('success', "✅ Berhasil menetapkan (assign) {$count} siswa secara massal.");
     }
 }

@@ -91,6 +91,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     // Manajemen Siswa (Assign)
     Route::get('/siswa', [SiswaController::class, 'index'])->name('siswa.index');
+    Route::post('/siswa/bulk-assign', [SiswaController::class, 'bulkAssign'])->name('siswa.bulk-assign');
     Route::get('/siswa/{user}/edit', [SiswaController::class, 'edit'])->name('siswa.edit');
     Route::put('/siswa/{user}', [SiswaController::class, 'update'])->name('siswa.update');
     
@@ -116,6 +117,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Kelola & Hapus Jurnal
     Route::get('/jurnal', [AdminJurnalController::class, 'index'])->name('jurnal.index');
+    Route::get('/jurnal/export', [AdminJurnalController::class, 'export'])->name('jurnal.export');
     Route::delete('/jurnal/{jurnal}', [AdminJurnalController::class, 'destroy'])->name('jurnal.destroy');
     Route::post('/jurnal/bulk-destroy', [AdminJurnalController::class, 'bulkDestroy'])->name('jurnal.bulk-destroy');
     
@@ -135,10 +137,13 @@ Route::middleware(['auth', 'role:pembimbing'])->prefix('pembimbing')->name('pemb
     // 📅 Absensi Siswa
     Route::get('/absensi', [\App\Http\Controllers\Pembimbing\AbsensiController::class, 'index'])->name('absensi');
     Route::get('/absensi/export', [\App\Http\Controllers\Pembimbing\AbsensiController::class, 'export'])->name('absensi.export');
+    Route::post('/absensi/bulk-verify', [\App\Http\Controllers\Pembimbing\AbsensiController::class, 'bulkVerify'])->name('absensi.bulk-verify');
+    Route::post('/absensi/bulk-reject', [\App\Http\Controllers\Pembimbing\AbsensiController::class, 'bulkReject'])->name('absensi.bulk-reject');
     Route::post('/absensi/{absensi}/verify', [\App\Http\Controllers\Pembimbing\AbsensiController::class, 'verify'])->name('absensi.verify');
     Route::post('/absensi/{absensi}/reject', [\App\Http\Controllers\Pembimbing\AbsensiController::class, 'reject'])->name('absensi.reject');
     // 📖 Review Jurnal
     Route::get('/jurnal', [\App\Http\Controllers\Pembimbing\JurnalController::class, 'index'])->name('jurnal');
+    Route::post('/jurnal/bulk-approve', [\App\Http\Controllers\Pembimbing\JurnalController::class, 'bulkApprove'])->name('jurnal.bulk-approve');
     Route::get('/jurnal/{jurnal}/edit', [\App\Http\Controllers\Pembimbing\JurnalController::class, 'edit'])->name('jurnal.edit');
     Route::put('/jurnal/{jurnal}', [\App\Http\Controllers\Pembimbing\JurnalController::class, 'update'])->name('jurnal.update');
     Route::post('/jurnal/{jurnal}/approve', [\App\Http\Controllers\Pembimbing\JurnalController::class, 'approve'])->name('jurnal.approve');

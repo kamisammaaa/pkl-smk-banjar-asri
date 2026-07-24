@@ -89,12 +89,19 @@
             </div>
             
             <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
-                <a href="{{ route('admin.jurnal.index') }}" class="bg-gray-150 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition active:scale-95">
-                    🔄 Reset Filter
-                </a>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition shadow-sm active:scale-95">
-                    🔍 Terapkan Filter
+                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl shadow-sm transition flex items-center justify-center gap-2 font-semibold active:scale-95 text-sm">
+                    🔍 <span class="hidden sm:inline">Filter</span>
                 </button>
+                <a href="{{ route('admin.jurnal.index') }}" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl shadow-sm transition flex items-center justify-center gap-2 font-semibold active:scale-95 text-sm">
+                    🔄 <span class="hidden sm:inline">Reset</span>
+                </a>
+                
+                @php
+                    $exportUrl = route('admin.jurnal.export', request()->all());
+                @endphp
+                <a href="{{ $exportUrl }}" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl shadow-sm transition flex items-center justify-center gap-2 font-semibold active:scale-95 text-sm whitespace-nowrap">
+                    📥 <span class="hidden sm:inline">Export CSV</span>
+                </a>
             </div>
         </form>
     </div>

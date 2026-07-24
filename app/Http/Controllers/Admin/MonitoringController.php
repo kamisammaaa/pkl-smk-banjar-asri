@@ -11,19 +11,50 @@ use Illuminate\Http\Request;
 class MonitoringController extends Controller
 {
     /**
-     * Dashboard admin (stats overview).
+     * Dashboard admin (stats overview & charts).
      */
     public function dashboard()
     {
+        // 1. Basic Stats
         $stats = [
             'total_siswa' => User::where('role', 'siswa')->count(),
             'total_pembimbing' => User::where('role', 'pembimbing')->count(),
-            'total_perusahaan' => \App\Models\Perusahaan::count(),
+            'total_perusahaan' => Perusahaan::count(),
             'absensi_hari_ini' => \App\Models\Absensi::whereDate('tanggal', today())->count(),
             'kunjungan_bulan_ini' => Kunjungan::whereMonth('created_at', now()->month)->count(),
         ];
         
-        return view('admin.dashboard', compact('stats'));
+        // 2. Alert Data: Unassigned Students
+        $siswaUnassignedPembimbing = User::where('role', 'siswa')
+            ->where(function($q) {
+                $q->whereDoesntHave('siswaProfile')
+                  ->orWhereHas('siswaProfile', fn($sq) => $sq->whereNull('pembimbing_id'));
+            })->count();
+            
+        $siswaUnassignedPerusahaan = User::where('role', 'siswa')
+            ->where(function($q) {
+                $q->whereDoesntHave('siswaProfile')
+                  ->orWhereHas('siswaProfile', fn($sq) => $sq->whereNull('perusahaan_id'));
+            })->count();
+            
+        // 3. Chart Data: Distribusi per Jurusan
+        $jurusanDist = \App\Models\SiswaProfile::with('jurusan')
+            ->selectRaw('jurusan_id, count(*) as total')
+            ->whereNotNull('jurusan_id')
+            ->groupBy('jurusan_id')
+            ->get();
+            
+        $chartJurusan = [
+            'labels' => $jurusanDist->pluck('jurusan.nama')->toArray(),
+            'data' => $jurusanDist->pluck('total')->toArray(),
+        ];
+
+        return view('admin.dashboard', compact(
+            'stats', 
+            'siswaUnassignedPembimbing', 
+            'siswaUnassignedPerusahaan',
+            'chartJurusan'
+        ));
     }
 
     /**
