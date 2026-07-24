@@ -142,4 +142,67 @@ class JurnalController extends Controller
             'catatan_revisi' => $validated['catatan_revisi'] ?? null,
         ]);
     }
+
+    public function export(Request $request)
+    {
+        $query = Jurnal::whereHas('siswa.siswaProfile', fn($q) => $q->where('pembimbing_id', Auth::id()))
+            ->with(['siswa.siswaProfile.perusahaan', 'siswa.siswaProfile.jurusan']);
+
+        if ($request->filled('siswa_id')) {
+            $query->where('siswa_user_id', $request->siswa_id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $jurnals = $query->latest('tanggal')->get();
+        $filename = "Export_Jurnal_Siswa_Binaan_" . date('Ymd_His') . ".csv";
+
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Cache-Control'       => 'no-cache, no-store, must-revalidate',
+            'Pragma'              => 'no-cache',
+            'Expires'             => '0',
+        ];
+
+        $callback = function () use ($jurnals) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM for excel
+
+            fputcsv($file, [
+                'No',
+                'Tanggal',
+                'Nama Siswa',
+                'NIS',
+                'Jurusan',
+                'Kegiatan',
+                'Status',
+                'Nilai',
+                'Link Foto'
+            ]);
+
+            $no = 1;
+            foreach ($jurnals as $j) {
+                $fotoUrl = $j->foto ? asset('storage/' . $j->foto) : 'Tidak ada foto';
+
+                fputcsv($file, [
+                    $no++,
+                    $j->tanggal->format('Y-m-d'),
+                    $j->siswa->name ?? '-',
+                    $j->siswa->siswaProfile->nis ?? '-',
+                    $j->siswa->siswaProfile->jurusan->nama ?? '-',
+                    $j->kegiatan,
+                    strtoupper($j->status),
+                    $j->nilai ?? '-',
+                    $fotoUrl
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }

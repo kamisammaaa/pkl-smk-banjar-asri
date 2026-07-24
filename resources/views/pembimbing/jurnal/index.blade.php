@@ -48,6 +48,8 @@
             <div class="flex gap-2">
                 <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition font-medium">🔍 Filter</button>
                 <a href="{{ route('pembimbing.jurnal') }}" class="flex-1 text-center bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-200 transition font-medium">Reset</a>
+                @php $exportUrl = route('pembimbing.jurnal.export', request()->all()); @endphp
+                <a href="{{ $exportUrl }}" class="flex-1 text-center bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition font-medium" title="Export CSV">📥 Export</a>
             </div>
         </form>
     </div>
