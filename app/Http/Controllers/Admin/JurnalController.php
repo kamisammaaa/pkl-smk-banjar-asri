@@ -163,11 +163,14 @@ class JurnalController extends Controller
                 'Jurusan',
                 'Pembimbing',
                 'Kegiatan',
-                'Status'
+                'Status',
+                'Link Foto'
             ]);
 
             $no = 1;
             foreach ($jurnals as $j) {
+                $fotoUrl = $j->foto ? asset('storage/' . $j->foto) : 'Tidak ada foto';
+
                 fputcsv($file, [
                     $no++,
                     $j->tanggal->format('Y-m-d'),
@@ -176,7 +179,8 @@ class JurnalController extends Controller
                     $j->siswa->siswaProfile->jurusan->nama ?? '-',
                     $j->siswa->siswaProfile->pembimbing->name ?? '-',
                     $j->kegiatan,
-                    strtoupper($j->status)
+                    strtoupper($j->status),
+                    $fotoUrl
                 ]);
             }
 
