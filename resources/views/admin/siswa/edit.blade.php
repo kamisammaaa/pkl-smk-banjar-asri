@@ -7,12 +7,12 @@
     
     {{-- Header --}}
     <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">✏️ Assign Siswa</h2>
-        <p class="text-sm text-gray-600">{{ $user->name }} ({{ $user->email }})</p>
+        <h2 class="text-2xl font-bold text-white drop-shadow-md">✏️ Assign Siswa</h2>
+        <p class="text-sm text-gray-400">{{ $user->name }} ({{ $user->email }})</p>
     </div>
 
     {{-- Form --}}
-    <form action="{{ route('admin.siswa.update', $user) }}" method="POST" class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+    <form action="{{ route('admin.siswa.update', $user) }}" method="POST" class="glass-panel p-6 rounded-lg shadow-md border border-white/5">
         @csrf
         @method('PUT')
 
@@ -20,7 +20,7 @@
             
             {{-- NIS --}}
             <div>
-                <label for="nis" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="nis" class="block text-sm font-medium text-gray-300 mb-1">
                     NIS <span class="text-red-500">*</span>
                 </label>
                 <input 
@@ -30,7 +30,7 @@
                     value="{{ old('nis', $profile?->nis) }}" 
                     required 
                     maxlength="20"
-                    class="mt-1 block w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 @error('nis') border-red-500 @enderror"
+                    class="mt-1 block w-full border border-white/20 rounded-lg bg-crypto-dark text-white placeholder-gray-500 p-2.5 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 @error('nis') border-red-500 @enderror"
                     placeholder="Masukkan NIS">
                 @error('nis')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -39,14 +39,14 @@
 
             {{-- Jurusan --}}
             <div>
-                <label for="jurusan_id" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="jurusan_id" class="block text-sm font-medium text-gray-300 mb-1">
                     Jurusan <span class="text-red-500">*</span>
                 </label>
                 <select 
                     name="jurusan_id" 
                     id="jurusan_id"
                     required 
-                    class="mt-1 block w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 @error('jurusan_id') border-red-500 @enderror">
+                    class="mt-1 block w-full border border-white/20 rounded-lg bg-crypto-dark text-white placeholder-gray-500 p-2.5 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 @error('jurusan_id') border-red-500 @enderror">
                     <option value="">-- Pilih Jurusan --</option>
                     @foreach($jurusan as $j)
                         <option value="{{ $j->id }}" 
@@ -62,13 +62,13 @@
 
             {{-- Perusahaan PKL --}}
             <div>
-                <label for="perusahaan_id" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="perusahaan_id" class="block text-sm font-medium text-gray-300 mb-1">
                     Perusahaan PKL
                 </label>
                 <select 
                     name="perusahaan_id" 
                     id="perusahaan_id"
-                    class="mt-1 block w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 @error('perusahaan_id') border-red-500 @enderror">
+                    class="mt-1 block w-full border border-white/20 rounded-lg bg-crypto-dark text-white placeholder-gray-500 p-2.5 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 @error('perusahaan_id') border-red-500 @enderror">
                     <option value="">-- Belum diassign --</option>
                     @foreach($perusahaan as $p)
                         <option value="{{ $p->id }}" 
@@ -80,18 +80,18 @@
                 @error('perusahaan_id')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
-                <p class="text-xs text-gray-500 mt-1">Kosongkan jika siswa belum mendapat tempat PKL</p>
+                <p class="text-xs text-gray-400 mt-1">Kosongkan jika siswa belum mendapat tempat PKL</p>
             </div>
 
             {{-- Pembimbing Sekolah --}}
             <div>
-                <label for="pembimbing_id" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="pembimbing_id" class="block text-sm font-medium text-gray-300 mb-1">
                     Pembimbing Sekolah
                 </label>
                 <select 
                     name="pembimbing_id" 
                     id="pembimbing_id"
-                    class="mt-1 block w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 @error('pembimbing_id') border-red-500 @enderror">
+                    class="mt-1 block w-full border border-white/20 rounded-lg bg-crypto-dark text-white placeholder-gray-500 p-2.5 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 @error('pembimbing_id') border-red-500 @enderror">
                     <option value="">-- Belum diassign --</option>
                     @foreach($pembimbing as $pb)
                         <option value="{{ $pb->id }}" 
@@ -103,15 +103,15 @@
                 @error('pembimbing_id')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
-                <p class="text-xs text-gray-500 mt-1">Kosongkan jika belum ada pembimbing</p>
+                <p class="text-xs text-gray-400 mt-1">Kosongkan jika belum ada pembimbing</p>
             </div>
 
             {{-- Buttons --}}
-            <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg transition active:scale-95 shadow-sm">
+            <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-white/5">
+                <button type="submit" class="bg-crypto-accent hover:bg-purple-600 text-white shadow-[0_0_15px_rgba(112,0,255,0.3)] font-medium px-6 py-2.5 rounded-lg transition active:scale-95 shadow-sm">
                     💾 Simpan Assign
                 </button>
-                <a href="{{ route('admin.siswa.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-6 py-2.5 rounded-lg transition text-center">
+                <a href="{{ route('admin.siswa.index') }}" class="bg-white/10 hover:bg-white/20 text-white font-medium px-6 py-2.5 rounded-lg transition text-center">
                     ❌ Batal
                 </a>
             </div>
@@ -119,7 +119,7 @@
     </form>
 
     {{-- Info Box --}}
-    <div class="mt-6 bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+    <div class="mt-6 glass-panel border-l-4 border-blue-500 p-4 rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.1)]">
         <div class="flex">
             <div class="flex-shrink-0">
                 <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
@@ -127,7 +127,7 @@
                 </svg>
             </div>
             <div class="ml-3">
-                <p class="text-sm text-blue-700">
+                <p class="text-sm text-blue-400">
                     <strong>💡 Tips:</strong> Setelah assign pembimbing, siswa akan muncul di dashboard pembimbing tersebut dan dapat mulai mengisi jurnal PKL.
                 </p>
             </div>

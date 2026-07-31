@@ -7,8 +7,8 @@
 
         <!-- Header Form -->
         <div class="mb-6 text-center">
-            <h2 class="text-xl font-bold text-gray-800">🔐 Masuk ke Akun</h2>
-            <p class="text-sm text-gray-500 mt-1">Selamat datang kembali di Sistem PKL</p>
+            <h2 class="text-xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">🔐 Masuk ke Akun</h2>
+            <p class="text-sm text-crypto-textMuted mt-1">Selamat datang kembali di Sistem PKL</p>
         </div>
 
         <!-- Email Address -->
@@ -23,7 +23,7 @@
             <div class="flex items-center justify-between">
                 <x-input-label for="password" :value="__('Password')" />
                 @if (Route::has('password.request'))
-                    <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
+                    <a class="underline text-sm text-gray-400 hover:text-crypto-accent rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-crypto-accent focus:ring-offset-crypto-dark transition-colors" href="{{ route('password.request') }}">
                         {{ __('Lupa password?') }}
                     </a>
                 @endif
@@ -41,8 +41,8 @@
         <!-- Remember Me -->
         <div class="block mt-4">
             <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Ingat saya') }}</span>
+                <input id="remember_me" type="checkbox" class="rounded border-white/20 bg-crypto-dark text-crypto-accent shadow-sm focus:ring-crypto-accent focus:ring-offset-crypto-dark" name="remember">
+                <span class="ms-2 text-sm text-gray-400">{{ __('Ingat saya') }}</span>
             </label>
         </div>
 
@@ -54,9 +54,9 @@
         </div>
 
         <!-- Link ke Register -->
-        <div class="text-center text-sm text-gray-600 mt-6 pt-4 border-t border-gray-100">
+        <div class="text-center text-sm text-gray-400 mt-6 pt-4 border-t border-white/10">
             Belum punya akun? 
-            <a href="{{ route('register') }}" class="text-indigo-600 hover:text-indigo-800 font-medium hover:underline transition">
+            <a href="{{ route('register') }}" class="text-crypto-success hover:text-crypto-successHover font-bold hover:underline transition-colors drop-shadow-[0_0_8px_rgba(14,203,129,0.3)]">
                 Daftar sebagai Siswa
             </a>
         </div>

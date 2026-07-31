@@ -6,14 +6,14 @@
     <!-- Header & Actions -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h2 class="text-xl font-bold text-gray-800">📅 Kelola & Hapus Absensi Siswa</h2>
-            <p class="text-sm text-gray-500 mt-1">Lihat detail absensi harian siswa dan hapus jika terdapat kesalahan data.</p>
+            <h2 class="text-xl font-bold text-white drop-shadow-md">📅 Kelola & Hapus Absensi Siswa</h2>
+            <p class="text-sm text-gray-400 mt-1">Lihat detail absensi harian siswa dan hapus jika terdapat kesalahan data.</p>
         </div>
     </div>
 
     <!-- Alert Success / Error -->
     @if(session('success'))
-        <div class="bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded-lg shadow-sm">
+        <div class="glass-panel border-l-4 border-green-500 p-4 rounded-xl shadow-[0_0_15px_rgba(34,197,94,0.1)] font-bold text-green-400">
             {!! session('success') !!}
         </div>
     @endif
@@ -24,25 +24,25 @@
     @endif
 
     <!-- 🔍 Search & Filter Bar -->
-    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+    <div class="glass-panel p-5 rounded-xl shadow-sm border border-white/5">
         <form action="{{ route('admin.absensi.index') }}" method="GET" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
                 <!-- Search Input -->
                 <div class="lg:col-span-2">
-                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Cari Siswa</label>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Cari Siswa</label>
                     <input 
                         type="text" 
                         name="search" 
                         value="{{ request('search') }}"
                         placeholder="Nama atau NIS..." 
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
+                        class="w-full border border-white/20 rounded-lg bg-crypto-dark text-white placeholder-gray-500 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
                     >
                 </div>
                 
                 <!-- Filter: Jurusan -->
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Jurusan</label>
-                    <select name="jurusan_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500">
+                    <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Jurusan</label>
+                    <select name="jurusan_id" class="w-full border border-white/20 rounded-lg bg-crypto-dark text-white placeholder-gray-500 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500">
                         <option value="">Semua Jurusan</option>
                         @foreach($jurusanList as $j)
                             <option value="{{ $j->id }}" {{ request('jurusan_id') == $j->id ? 'selected' : '' }}>
@@ -54,8 +54,8 @@
                 
                 <!-- Filter: Status -->
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Status Kehadiran</label>
-                    <select name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500">
+                    <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Status Kehadiran</label>
+                    <select name="status" class="w-full border border-white/20 rounded-lg bg-crypto-dark text-white placeholder-gray-500 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500">
                         <option value="">Semua Status</option>
                         @foreach($statusOptions as $key => $label)
                             <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>
@@ -67,32 +67,32 @@
 
                 <!-- Filter: Tanggal Mulai -->
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Dari Tanggal</label>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Dari Tanggal</label>
                     <input 
                         type="date" 
                         name="start_date" 
                         value="{{ request('start_date') }}"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
+                        class="w-full border border-white/20 rounded-lg bg-crypto-dark text-white placeholder-gray-500 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
                     >
                 </div>
 
                 <!-- Filter: Tanggal Selesai -->
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Sampai Tanggal</label>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Sampai Tanggal</label>
                     <input 
                         type="date" 
                         name="end_date" 
                         value="{{ request('end_date') }}"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
+                        class="w-full border border-white/20 rounded-lg bg-crypto-dark text-white placeholder-gray-500 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
                     >
                 </div>
             </div>
             
             <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
-                <a href="{{ route('admin.absensi.index') }}" class="bg-gray-150 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition active:scale-95">
+                <a href="{{ route('admin.absensi.index') }}" class="bg-gray-150 hover:bg-gray-200 text-gray-300 px-4 py-2 rounded-lg text-sm font-medium transition active:scale-95">
                     🔄 Reset Filter
                 </a>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition shadow-sm active:scale-95">
+                <button type="submit" class="bg-crypto-accent hover:bg-purple-600 text-white shadow-[0_0_15px_rgba(112,0,255,0.3)] px-5 py-2 rounded-lg text-sm font-medium transition shadow-sm active:scale-95">
                     🔍 Terapkan Filter
                 </button>
             </div>
@@ -102,12 +102,12 @@
     <!-- Bulk Action & Table Form -->
     <form id="bulk-delete-form" action="{{ route('admin.absensi.bulk-destroy') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus semua data absensi terpilih?')">
         @csrf
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="glass-panel rounded-xl shadow-sm border border-white/5 overflow-hidden">
             <!-- Table Action Header -->
-            <div class="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between gap-4">
+            <div class="px-4 py-3 glass-panel/5 border-b border-gray-100 flex items-center justify-between gap-4">
                 <div class="flex items-center gap-2">
                     <input type="checkbox" id="select-all-checkbox" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer">
-                    <label for="select-all-checkbox" class="text-xs font-semibold text-gray-600 uppercase cursor-pointer select-none">Pilih Semua</label>
+                    <label for="select-all-checkbox" class="text-xs font-semibold text-gray-400 uppercase cursor-pointer select-none">Pilih Semua</label>
                 </div>
                 <button type="submit" id="bulk-delete-btn" disabled class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-3 py-2 rounded shadow transition flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
                     🗑️ Hapus Terpilih
@@ -117,7 +117,7 @@
             <!-- Table -->
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm min-w-[1000px]">
-                    <thead class="bg-gray-50 text-xs font-semibold text-gray-600 border-b">
+                    <thead class="glass-panel/5 text-xs font-semibold text-gray-400 border-b border-white/10">
                         <tr>
                             <th class="w-12 px-4 py-3 text-center">Pilih</th>
                             <th class="px-4 py-3">Siswa</th>
@@ -132,7 +132,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse($absensi as $a)
-                        <tr class="hover:bg-gray-50/70 transition">
+                        <tr class="hover:glass-panel/5/70 transition">
                             <!-- Checkbox -->
                             <td class="px-4 py-3 text-center">
                                 <input type="checkbox" name="ids[]" value="{{ $a->id }}" class="row-checkbox rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer">
@@ -140,24 +140,24 @@
 
                             <!-- Siswa -->
                             <td class="px-4 py-3">
-                                <div class="font-bold text-gray-800">{{ $a->siswa->name ?? 'Siswa Tidak Ditemukan' }}</div>
+                                <div class="font-bold text-white drop-shadow-md">{{ $a->siswa->name ?? 'Siswa Tidak Ditemukan' }}</div>
                                 <div class="text-xs text-gray-400 mt-0.5">NIS: {{ $a->siswa->siswaProfile->nis ?? '-' }}</div>
-                                <div class="text-xs text-gray-500">Jurusan: {{ $a->siswa->siswaProfile->jurusan->nama ?? '-' }}</div>
+                                <div class="text-xs text-gray-400">Jurusan: {{ $a->siswa->siswaProfile->jurusan->nama ?? '-' }}</div>
                             </td>
 
                             <!-- Tanggal -->
                             <td class="px-4 py-3 whitespace-nowrap">
-                                <span class="font-medium text-gray-700">{{ $a->tanggal->format('d M Y') }}</span>
+                                <span class="font-medium text-gray-300">{{ $a->tanggal->format('d M Y') }}</span>
                                 <div class="text-xs text-gray-400 mt-0.5">{{ $a->tanggal->translatedFormat('l') }}</div>
                             </td>
 
                             <!-- Jam -->
                             <td class="px-4 py-3 whitespace-nowrap">
-                                <div class="text-xs text-gray-700">
+                                <div class="text-xs text-gray-300">
                                     <span class="font-semibold text-green-700">Masuk:</span> 
                                     {{ $a->check_in ? $a->check_in->format('H:i:s') : '-' }}
                                 </div>
-                                <div class="text-xs text-gray-700 mt-1">
+                                <div class="text-xs text-gray-300 mt-1">
                                     <span class="font-semibold text-red-700">Pulang:</span> 
                                     {{ $a->check_out ? $a->check_out->format('H:i:s') : '-' }}
                                 </div>
@@ -165,7 +165,7 @@
 
                             <!-- Lokasi & IP -->
                             <td class="px-4 py-3">
-                                <div class="text-xs text-gray-700 font-medium truncate max-w-[200px]" title="{{ $a->lokasi_nama ?? '-' }}">
+                                <div class="text-xs text-gray-300 font-medium truncate max-w-[200px]" title="{{ $a->lokasi_nama ?? '-' }}">
                                     📍 {{ $a->lokasi_nama ?: 'Tidak ada GPS' }}
                                 </div>
                                 <div class="text-xs text-gray-400 mt-1 font-mono">
@@ -177,11 +177,11 @@
                             <td class="px-4 py-3 text-center whitespace-nowrap">
                                 @if($a->status === 'hadir' && $a->foto)
                                     <a href="{{ asset('storage/' . $a->foto) }}" target="_blank" class="inline-block relative group" title="Lihat Foto Selfie">
-                                        <img src="{{ asset('storage/' . $a->foto) }}" class="w-10 h-10 object-cover rounded-lg border border-gray-300 hover:scale-110 transition shadow-sm">
+                                        <img src="{{ asset('storage/' . $a->foto) }}" class="w-10 h-10 object-cover rounded-lg border border-white/20 hover:scale-110 transition shadow-sm">
                                         <span class="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-0.5 text-[8px]">📸</span>
                                     </a>
                                 @elseif(in_array($a->status, ['sakit', 'izin']) && $a->bukti_file)
-                                    <a href="{{ asset('storage/' . $a->bukti_file) }}" target="_blank" class="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100 font-medium transition" title="Lihat Berkas Bukti">
+                                    <a href="{{ asset('storage/' . $a->bukti_file) }}" target="_blank" class="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-white hover:underline bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100 font-medium transition" title="Lihat Berkas Bukti">
                                         📄 Bukti File
                                     </a>
                                 @else
@@ -227,9 +227,9 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="px-4 py-12 text-center text-gray-500">
+                            <td colspan="9" class="px-4 py-12 text-center text-gray-400">
                                 <div class="text-gray-400 text-4xl mb-3">🔍</div>
-                                <div class="text-base font-semibold text-gray-700">Tidak Ada Data Absensi</div>
+                                <div class="text-base font-semibold text-gray-300">Tidak Ada Data Absensi</div>
                                 <div class="text-xs text-gray-400 mt-1">Coba sesuaikan kata kunci pencarian atau filter tanggal.</div>
                             </td>
                         </tr>
@@ -240,7 +240,7 @@
 
             <!-- Pagination -->
             @if($absensi->hasPages())
-                <div class="px-4 py-3 border-t bg-gray-50">
+                <div class="px-4 py-3 border-t glass-panel/5">
                     {{ $absensi->links() }}
                 </div>
             @endif

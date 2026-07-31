@@ -206,4 +206,77 @@ class RekapAbsensiController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    /**
+     * Export rekap absensi ke PDF
+     */
+    public function exportPdf(Request $request)
+    {
+        AttendanceHelper::generateAlphaForAllActiveSiswa();
+
+        $bulan          = $request->get('bulan', now()->format('Y-m'));
+        $pembimbing_id  = $request->get('pembimbing_id');
+        $jurusan_id     = $request->get('jurusan_id');
+        $filter_masalah = $request->get('filter_masalah');
+
+        $query = User::where('role', 'siswa')
+            ->with('siswaProfile.jurusan', 'siswaProfile.pembimbing', 'siswaProfile.perusahaan.periodePKL');
+
+        if ($pembimbing_id) {
+            $query->whereHas('siswaProfile', fn($q) => $q->where('pembimbing_id', $pembimbing_id));
+        }
+        if ($jurusan_id) {
+            $query->whereHas('siswaProfile', fn($q) => $q->where('jurusan_id', $jurusan_id));
+        }
+
+        $siswaList = $query->get();
+
+        $siswaIds   = $siswaList->pluck('id')->toArray();
+        $allAbsensi = Absensi::whereIn('siswa_user_id', $siswaIds)
+            ->where('tanggal', 'like', "{$bulan}%")
+            ->get()
+            ->groupBy('siswa_user_id');
+
+        $rekap = [];
+        foreach ($siswaList as $s) {
+            $absenBulan = $allAbsensi->get($s->id, collect());
+
+            $hadirVerified = $absenBulan->where('status', 'hadir')->where('is_verified', true);
+            $hadir      = $hadirVerified->where('is_late', false)->count();
+            $terlambat  = $hadirVerified->where('is_late', true)->count();
+            $sakit      = $absenBulan->where('status', 'sakit')->where('is_verified', true)->count();
+            $izin       = $absenBulan->where('status', 'izin')->where('is_verified', true)->count();
+            $libur      = $absenBulan->where('status', 'libur')->where('is_verified', true)->count();
+            $alpha      = $absenBulan->where('status', 'alpha')->count();
+            $total_hari = $hadir + $terlambat + $sakit + $izin + $libur + $alpha;
+
+            $hariAktif  = $total_hari - $libur;
+            $persentase = $hariAktif > 0 ? round((($hadir + $terlambat) / $hariAktif) * 100, 1) : 0;
+
+            if ($filter_masalah === 'alpha' && $alpha == 0) continue;
+            if ($filter_masalah === 'sakit' && $sakit == 0) continue;
+            if ($filter_masalah === 'izin' && $izin == 0) continue;
+            if ($filter_masalah === 'terlambat' && $terlambat == 0) continue;
+
+            $rekap[] = [
+                'siswa'      => $s,
+                'hadir'      => $hadir,
+                'terlambat'  => $terlambat,
+                'sakit'      => $sakit,
+                'izin'       => $izin,
+                'libur'      => $libur,
+                'alpha'      => $alpha,
+                'total_hari' => $total_hari,
+                'hari_aktif' => $hariAktif,
+                'persentase' => $persentase,
+            ];
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.rekap-absensi.pdf', compact(
+            'rekap', 'bulan', 'request'
+        ));
+        
+        $pdf->setPaper('A4', 'landscape');
+        return $pdf->download('Rekap_Absensi_' . $bulan . '.pdf');
+    }
 }

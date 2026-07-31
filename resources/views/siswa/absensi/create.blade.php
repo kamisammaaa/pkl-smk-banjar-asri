@@ -2,38 +2,38 @@
 @section('page-title', 'Tambah Absensi Harian')
 
 @section('content')
-<div class="min-h-screen py-6 bg-slate-50">
+<div class="min-h-screen py-6">
     <div class="w-full max-w-2xl mx-auto space-y-6 px-2">
     
     {{-- Back Button & Title --}}
     <div class="flex items-center justify-between">
-        <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
             📅 Input Absensi Hari Ini
-            <span class="text-sm font-normal text-gray-500">{{ now()->translatedFormat('l, d F Y') }}</span>
+            <span class="text-sm font-normal text-gray-400">{{ now()->translatedFormat('l, d F Y') }}</span>
         </h2>
-        <a href="{{ route('siswa.absensi.index') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-4 py-2 rounded-lg transition border border-gray-300">
+        <a href="{{ route('siswa.absensi.index') }}" class="bg-white/5 hover:bg-white/10 text-gray-300 text-sm px-4 py-2 rounded-lg transition-colors border border-white/10">
             ⬅️ Kembali
         </a>
     </div>
 
     {{-- ⏰ Jam Realtime --}}
-    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-4 text-white shadow-md">
-        <div class="flex items-center justify-between">
+    <div class="glass-panel bg-gradient-to-r from-crypto-accent/40 to-blue-600/40 border border-white/10 rounded-xl p-4 text-white shadow-[0_0_15px_rgba(112,0,255,0.2)]">
+        <div class="flex items-center justify-between relative z-10">
             <div>
-                <p class="text-blue-100 text-xs font-medium uppercase tracking-wide">Waktu Sekarang</p>
-                <p id="realtimeClock" class="text-3xl font-bold tabular-nums tracking-tight">--:--:--</p>
+                <p class="text-blue-200 text-xs font-medium uppercase tracking-wide drop-shadow-md">Waktu Sekarang</p>
+                <p id="realtimeClock" class="text-3xl font-bold tabular-nums tracking-tight drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">--:--:--</p>
                 <p id="realtimeDate" class="text-blue-200 text-xs mt-0.5">{{ now()->translatedFormat('l, d F Y') }}</p>
             </div>
             @if(isset($perusahaan))
-            <div class="text-right">
-                <p class="text-blue-100 text-xs font-medium uppercase tracking-wide">Jam Masuk</p>
-                <p class="text-2xl font-bold">{{ $perusahaan->getJamMasukLabel() }}</p>
+            <div class="text-right relative z-10">
+                <p class="text-blue-200 text-xs font-medium uppercase tracking-wide drop-shadow-md">Jam Masuk</p>
+                <p class="text-2xl font-bold drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">{{ $perusahaan->getJamMasukLabel() }}</p>
                 <p class="text-blue-200 text-xs">Toleransi {{ $perusahaan->toleransi_menit ?? 15 }} menit</p>
             </div>
             @endif
         </div>
         @if(isset($perusahaan))
-        <div id="lateWarningBanner" class="hidden mt-3 bg-red-500/30 border border-red-300/50 rounded-lg px-3 py-2 text-sm font-semibold text-white flex items-center gap-2">
+        <div id="lateWarningBanner" class="hidden mt-3 bg-red-500/20 border border-red-500/50 rounded-lg px-3 py-2 text-sm font-semibold text-red-300 flex items-center gap-2 relative z-10 shadow-[0_0_10px_rgba(239,68,68,0.3)]">
             ⚠️ <span id="lateWarningText">Anda sudah terlambat!</span>
         </div>
         @endif
@@ -41,18 +41,18 @@
 
     {{-- Info Periode PKL --}}
     @if(isset($periode))
-    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-700 flex items-start gap-3">
-        <span class="text-lg">📅</span>
+    <div class="glass-panel bg-blue-500/20 border border-blue-500/30 rounded-xl p-4 text-sm text-blue-300 flex items-start gap-3 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+        <span class="text-lg drop-shadow-[0_0_5px_rgba(59,130,246,0.5)]">📅</span>
         <div>
-            <p class="font-semibold">Periode PKL Aktif</p>
-            <p class="text-blue-600">{{ \Carbon\Carbon::parse($periode->tanggal_mulai)->format('d M Y') }} – {{ \Carbon\Carbon::parse($periode->tanggal_selesai)->format('d M Y') }}</p>
+            <p class="font-semibold text-blue-200">Periode PKL Aktif</p>
+            <p class="text-blue-400">{{ \Carbon\Carbon::parse($periode->tanggal_mulai)->format('d M Y') }} – {{ \Carbon\Carbon::parse($periode->tanggal_selesai)->format('d M Y') }}</p>
         </div>
     </div>
     @endif
 
     {{-- Error Messages --}}
     @if($errors->any()) 
-        <div class="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-lg shadow-sm">
+        <div class="glass-panel bg-red-500/20 border-l-4 border-red-500 text-red-400 p-4 rounded-lg shadow-[0_0_15px_rgba(239,68,68,0.2)]">
             <ul class="list-disc list-inside text-sm">
                 @foreach($errors->all() as $e)
                     <li>{{ $e }}</li>
@@ -62,49 +62,49 @@
     @endif
 
     {{-- Form Absensi --}}
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+    <div class="glass-panel p-6 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.1)] border border-white/5">
         <form action="{{ route('siswa.absensi.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="absensiForm">
             @csrf
 
             {{-- 1. Pilihan Status --}}
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-3">Pilih Status Absensi Hari Ini</label>
+                <label class="block text-sm font-semibold text-gray-300 mb-3">Pilih Status Absensi Hari Ini</label>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     
                     {{-- Hadir --}}
-                    <label class="border-2 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition hover:border-green-400 @error('status') border-red-300 @else border-gray-200 @enderror" id="label_hadir">
+                    <label class="border-2 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-colors hover:border-crypto-success hover:bg-white/5 @error('status') border-red-500/50 @else border-white/10 @enderror" id="label_hadir">
                         <input type="radio" name="status" value="hadir" class="sr-only" {{ old('status', 'hadir') === 'hadir' ? 'checked' : '' }}>
-                        <span class="text-2xl mb-1">✅</span>
-                        <span class="text-sm font-bold text-gray-700">Hadir</span>
-                        <span class="text-[10px] text-gray-400 mt-0.5">Upload selfie</span>
+                        <span class="text-2xl mb-1 drop-shadow-[0_0_5px_rgba(14,203,129,0.5)]">✅</span>
+                        <span class="text-sm font-bold text-gray-200">Hadir</span>
+                        <span class="text-[10px] text-gray-500 mt-0.5">Upload selfie</span>
                     </label>
                     
                     {{-- Sakit --}}
-                    <label class="border-2 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition hover:border-orange-400 @error('status') border-red-300 @else border-gray-200 @enderror" id="label_sakit">
+                    <label class="border-2 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-colors hover:border-orange-500 hover:bg-white/5 @error('status') border-red-500/50 @else border-white/10 @enderror" id="label_sakit">
                         <input type="radio" name="status" value="sakit" class="sr-only" {{ old('status') === 'sakit' ? 'checked' : '' }}>
-                        <span class="text-2xl mb-1">🤒</span>
-                        <span class="text-sm font-bold text-gray-700">Sakit</span>
-                        <span class="text-[10px] text-gray-400 mt-0.5">Surat dokter</span>
+                        <span class="text-2xl mb-1 drop-shadow-[0_0_5px_rgba(249,115,22,0.5)]">🤒</span>
+                        <span class="text-sm font-bold text-gray-200">Sakit</span>
+                        <span class="text-[10px] text-gray-500 mt-0.5">Surat dokter</span>
                     </label>
                     
                     {{-- Izin --}}
-                    <label class="border-2 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition hover:border-blue-400 @error('status') border-red-300 @else border-gray-200 @enderror" id="label_izin">
+                    <label class="border-2 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-colors hover:border-blue-500 hover:bg-white/5 @error('status') border-red-500/50 @else border-white/10 @enderror" id="label_izin">
                         <input type="radio" name="status" value="izin" class="sr-only" {{ old('status') === 'izin' ? 'checked' : '' }}>
-                        <span class="text-2xl mb-1">📝</span>
-                        <span class="text-sm font-bold text-gray-700">Izin</span>
-                        <span class="text-[10px] text-gray-400 mt-0.5">Surat izin</span>
+                        <span class="text-2xl mb-1 drop-shadow-[0_0_5px_rgba(59,130,246,0.5)]">📝</span>
+                        <span class="text-sm font-bold text-gray-200">Izin</span>
+                        <span class="text-[10px] text-gray-500 mt-0.5">Surat izin</span>
                     </label>
 
                     {{-- Libur --}}
-                    <label class="border-2 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition hover:border-purple-400 @error('status') border-red-300 @else border-gray-200 @enderror" id="label_libur">
+                    <label class="border-2 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-colors hover:border-purple-500 hover:bg-white/5 @error('status') border-red-500/50 @else border-white/10 @enderror" id="label_libur">
                         <input type="radio" name="status" value="libur" class="sr-only" {{ old('status') === 'libur' ? 'checked' : '' }}>
-                        <span class="text-2xl mb-1">🏖️</span>
-                        <span class="text-sm font-bold text-gray-700">Libur</span>
-                        <span class="text-[10px] text-gray-400 mt-0.5">Hari libur</span>
+                        <span class="text-2xl mb-1 drop-shadow-[0_0_5px_rgba(168,85,247,0.5)]">🏖️</span>
+                        <span class="text-sm font-bold text-gray-200">Libur</span>
+                        <span class="text-[10px] text-gray-500 mt-0.5">Hari libur</span>
                     </label>
                 </div>
                 @error('status')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -113,18 +113,20 @@
                  ========================================== --}}
             <div id="section_hadir" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    <label class="block text-sm font-semibold text-gray-300 mb-1">
                         Foto Selfie Lokasi PKL <span class="text-red-500">*</span>
                     </label>
-                    <x-upload-foto 
-                        name="foto" 
-                        id="input_foto"
-                        accept="image/*"
-                        :required="false"
-                        :max-mb="20"
-                        btn-color="green"
-                        hint="📸 Upload foto selfie sebagai bukti kehadiran. Foto akan dikompres otomatis. Waktu check-in direkam saat tombol Kirim ditekan."
-                    />
+                    <div class="text-gray-300">
+                        <x-upload-foto 
+                            name="foto" 
+                            id="input_foto"
+                            accept="image/*"
+                            :required="false"
+                            :max-mb="20"
+                            btn-color="green"
+                            hint="📸 Upload foto selfie sebagai bukti kehadiran. Foto akan dikompres otomatis. Waktu check-in direkam saat tombol Kirim ditekan."
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -133,32 +135,34 @@
                  ========================================== --}}
             <div id="section_sakit_izin" class="hidden space-y-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1" id="label_alasan">
+                    <label class="block text-sm font-semibold text-gray-300 mb-1" id="label_alasan">
                         Alasan Tidak Hadir <span class="text-red-500">*</span>
                     </label>
                     <textarea name="alasan" 
                               id="input_alasan"
                               rows="3" 
                               placeholder="Tuliskan keterangan/alasan secara detail..."
-                              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition">{{ old('alasan') }}</textarea>
+                              class="w-full bg-crypto-dark border border-white/20 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-crypto-accent focus:border-crypto-accent transition-colors">{{ old('alasan') }}</textarea>
                     @error('alasan')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div id="section_bukti">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1" id="label_bukti">
+                    <label class="block text-sm font-semibold text-gray-300 mb-1" id="label_bukti">
                         Dokumen Bukti <span id="bukti_required_mark" class="text-red-500">*</span>
                     </label>
-                    <x-upload-foto 
-                        name="bukti" 
-                        id="input_bukti"
-                        accept="image/*,.pdf"
-                        :required="false"
-                        :max-mb="20"
-                        btn-color="purple"
-                        hint="📄 Format: JPG, PNG, PDF. Maks. 20MB (akan dikompres otomatis untuk gambar)."
-                    />
+                    <div class="text-gray-300">
+                        <x-upload-foto 
+                            name="bukti" 
+                            id="input_bukti"
+                            accept="image/*,.pdf"
+                            :required="false"
+                            :max-mb="20"
+                            btn-color="purple"
+                            hint="📄 Format: JPG, PNG, PDF. Maks. 20MB (akan dikompres otomatis untuk gambar)."
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -166,12 +170,12 @@
                  DIV FOR LIBUR
                  ========================================== --}}
             <div id="section_libur" class="hidden space-y-4">
-                <div class="bg-purple-50 border border-purple-200 rounded-xl p-4">
-                    <p class="text-sm text-purple-700 font-semibold mb-1">🏖️ Laporan Hari Libur</p>
-                    <p class="text-xs text-purple-600">Gunakan status ini jika hari ini adalah hari libur nasional, libur perusahaan, atau libur resmi lainnya. Hari libur tidak dihitung dalam persentase kehadiran.</p>
+                <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4">
+                    <p class="text-sm text-purple-400 font-semibold mb-1 drop-shadow-[0_0_5px_rgba(168,85,247,0.5)]">🏖️ Laporan Hari Libur</p>
+                    <p class="text-xs text-gray-400">Gunakan status ini jika hari ini adalah hari libur nasional, libur perusahaan, atau libur resmi lainnya. Hari libur tidak dihitung dalam persentase kehadiran.</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    <label class="block text-sm font-semibold text-gray-300 mb-1">
                         Keterangan Libur <span class="text-red-500">*</span>
                     </label>
                     <input type="text"
@@ -179,9 +183,9 @@
                            id="input_alasan_libur"
                            placeholder="Contoh: Libur Nasional Hari Kemerdekaan, Libur Perusahaan, dll."
                            value="{{ old('alasan') }}"
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-200 focus:border-purple-500 transition">
+                           class="w-full bg-crypto-dark border border-white/20 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-crypto-accent focus:border-crypto-accent transition-colors">
                     @error('alasan')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
@@ -189,14 +193,14 @@
             {{-- Submit Button --}}
             <button type="submit" 
                     id="btnSubmitAbsensi"
-                    class="w-full bg-blue-600 text-white font-bold px-4 py-3.5 rounded-lg hover:bg-blue-700 transition text-base active:scale-95 shadow-sm flex items-center justify-center gap-2">
+                    class="w-full bg-crypto-success hover:bg-emerald-500 text-white font-bold px-4 py-3.5 rounded-lg transition-colors text-base active:scale-95 shadow-[0_0_15px_rgba(14,203,129,0.3)] flex items-center justify-center gap-2">
                 <span id="submitIcon">📤</span>
                 <span id="submitText">Kirim Absensi</span>
                 <span id="submitSpinner" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
             </button>
 
-            <p class="text-center text-xs text-gray-400">
-                Waktu absensi direkam <strong>saat tombol ditekan</strong> — pastikan Anda sudah siap sebelum submit.
+            <p class="text-center text-xs text-gray-500">
+                Waktu absensi direkam <strong class="text-gray-300">saat tombol ditekan</strong> — pastikan Anda sudah siap sebelum submit.
             </p>
         </form>
     </div>
@@ -233,10 +237,10 @@
 
         // Color maps per status
         const statusColors = {
-            'hadir': { border: 'border-green-500', bg: 'bg-green-50' },
-            'sakit': { border: 'border-orange-500', bg: 'bg-orange-50' },
-            'izin':  { border: 'border-blue-500',   bg: 'bg-blue-50' },
-            'libur': { border: 'border-purple-500',  bg: 'bg-purple-50' },
+            'hadir': { border: 'border-crypto-success', bg: 'bg-white/5' },
+            'sakit': { border: 'border-orange-500', bg: 'bg-white/5' },
+            'izin':  { border: 'border-blue-500',   bg: 'bg-white/5' },
+            'libur': { border: 'border-purple-500',  bg: 'bg-white/5' },
         };
 
         // Initialize on load
@@ -263,14 +267,14 @@
 
             // Reset all
             Object.values(labels).forEach(lbl => {
-                lbl.classList.remove('border-green-500', 'bg-green-50', 'border-orange-500', 'bg-orange-50', 
-                                     'border-blue-500', 'bg-blue-50', 'border-purple-500', 'bg-purple-50');
-                lbl.classList.add('border-gray-200');
+                lbl.classList.remove('border-crypto-success', 'bg-white/5', 'border-orange-500', 
+                                     'border-blue-500', 'border-purple-500');
+                lbl.classList.add('border-white/10');
             });
 
             const sel = getSelectedStatus();
             if (labels[sel] && colors[sel]) {
-                labels[sel].classList.remove('border-gray-200');
+                labels[sel].classList.remove('border-white/10');
                 labels[sel].classList.add(colors[sel].border, colors[sel].bg);
             }
         }

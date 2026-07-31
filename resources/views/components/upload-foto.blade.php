@@ -23,12 +23,13 @@
     $effectiveMax = min($maxMbVal, (int) ini_get('upload_max_filesize'));
     
     $colors = [
-        'blue'   => ['btn' => 'file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100', 'bar' => 'bg-blue-500', 'ring' => 'focus:ring-blue-200'],
-        'green'  => ['btn' => 'file:bg-green-50 file:text-green-700 hover:file:bg-green-100', 'bar' => 'bg-green-500', 'ring' => 'focus:ring-green-200'],
-        'purple' => ['btn' => 'file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100', 'bar' => 'bg-purple-500', 'ring' => 'focus:ring-purple-200'],
-        'orange' => ['btn' => 'file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100', 'bar' => 'bg-orange-500', 'ring' => 'focus:ring-orange-200'],
+        'blue'    => ['btn' => 'file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100', 'bar' => 'bg-blue-500', 'ring' => 'focus:ring-blue-200'],
+        'green'   => ['btn' => 'file:bg-green-50 file:text-green-700 hover:file:bg-green-100', 'bar' => 'bg-green-500', 'ring' => 'focus:ring-green-200'],
+        'emerald' => ['btn' => 'file:bg-emerald-500/20 file:text-emerald-400 hover:file:bg-emerald-500/30 file:border file:border-emerald-500/30 shadow-inner', 'bar' => 'bg-crypto-success', 'ring' => 'focus:ring-crypto-success'],
+        'purple'  => ['btn' => 'file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100', 'bar' => 'bg-purple-500', 'ring' => 'focus:ring-purple-200'],
+        'orange'  => ['btn' => 'file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100', 'bar' => 'bg-orange-500', 'ring' => 'focus:ring-orange-200'],
     ];
-    $color = $colors[$btnColor ?? 'blue'];
+    $color = $colors[$btnColor ?? 'blue'] ?? $colors['blue'];
 @endphp
 
 <div class="upload-wrapper" data-upload-id="{{ $inputId }}">

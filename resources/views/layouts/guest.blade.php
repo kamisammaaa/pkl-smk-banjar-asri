@@ -22,15 +22,22 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-slate-900 antialiased bg-slate-50">
+    <body class="font-sans antialiased bg-crypto-dark text-gray-200 min-h-screen relative selection:bg-crypto-success selection:text-crypto-dark">
+        <!-- Background Animations -->
+        <div class="bg-animation-container">
+            <div class="bg-gradient-ambient"></div>
+            <div class="bg-orb orb-1"></div>
+            <div class="bg-orb orb-2"></div>
+            <div class="bg-orb orb-3"></div>
+        </div>
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
-            <div class="hover-lift">
-                <a href="/" class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-white shadow-md border border-slate-100 p-2">
+            <div class="hover-lift relative z-10">
+                <a href="/" class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-white shadow-[0_0_20px_rgba(255,255,255,0.1)] border border-white/10 p-2">
                     <img src="{{ asset('android-chrome-192x192.png') }}?v={{ filemtime(public_path('android-chrome-192x192.png')) }}" alt="Logo" class="w-full h-full object-contain">
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-6 bg-white shadow-xl border border-slate-150 overflow-hidden sm:rounded-3xl hover-lift">
+            <div class="w-full sm:max-w-md mt-8 px-8 py-8 glass-panel shadow-[0_0_40px_rgba(112,0,255,0.15)] border border-white/10 overflow-hidden sm:rounded-3xl relative z-10 backdrop-blur-xl">
                 {{ $slot }}
             </div>
         </div>

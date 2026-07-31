@@ -2,7 +2,7 @@
 @section('content')
 <div class="max-w-3xl mx-auto px-4 py-6">
     <h2 class="text-2xl font-bold mb-6">✏️ Edit Pengumuman</h2>
-    <form action="{{ route('admin.pengumuman.update', $pengumuman) }}" method="POST" class="bg-white p-6 rounded shadow">
+    <form action="{{ route('admin.pengumuman.update', $pengumuman) }}" method="POST" class="glass-panel p-6 rounded shadow">
         @csrf @method('PUT')
         <div class="grid gap-4">
             <div><label class="block text-sm font-medium">Judul</label><input type="text" name="judul" value="{{ old('judul', $pengumuman->judul) }}" required class="mt-1 block w-full border rounded p-2"></div>

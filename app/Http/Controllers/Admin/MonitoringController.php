@@ -113,6 +113,38 @@ class MonitoringController extends Controller
     }
 
     /**
+     * Export kunjungan to PDF.
+     */
+    public function exportKunjunganPdf(Request $request)
+    {
+        $query = Kunjungan::with(['pembimbing', 'perusahaan.siswaProfiles.user']);
+
+        // Filter by pembimbing
+        if ($request->filled('pembimbing_id')) {
+            $query->where('pembimbing_id', $request->pembimbing_id);
+        }
+
+        // Filter by perusahaan
+        if ($request->filled('perusahaan_id')) {
+            $query->where('perusahaan_id', $request->perusahaan_id);
+        }
+
+        // Filter by tanggal
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal', $request->tanggal);
+        }
+
+        $kunjungans = $query->oldest('tanggal')->get();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.monitoring.pdf-kunjungan', compact('kunjungans', 'request'));
+        
+        // Optional: Set paper orientation if table is wide
+        $pdf->setPaper('A4', 'landscape');
+
+        return $pdf->download('Laporan_Monitoring_Kunjungan_' . date('Ymd_His') . '.pdf');
+    }
+
+    /**
      * Monitoring verifikasi absensi.
      */
     public function verifikasi(Request $request)

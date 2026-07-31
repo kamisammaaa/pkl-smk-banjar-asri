@@ -9,7 +9,51 @@
         font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        @apply bg-crypto-dark text-gray-200 selection:bg-crypto-success selection:text-crypto-dark;
     }
+}
+
+/* Background Animation */
+.bg-animation-container {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.bg-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.15;
+    animation: pulse-slow 8s infinite alternate;
+}
+
+.orb-1 {
+    width: 400px;
+    height: 400px;
+    background: #0ecb81;
+    top: -100px;
+    left: -100px;
+}
+
+.orb-2 {
+    width: 500px;
+    height: 500px;
+    background: #7000ff;
+    bottom: -150px;
+    right: -100px;
+    animation-delay: 2s;
+}
+
+.orb-3 {
+    width: 300px;
+    height: 300px;
+    background: #3b82f6;
+    top: 40%;
+    left: 40%;
+    animation-delay: 4s;
 }
 
 /* Custom Scrollbar */
@@ -30,23 +74,24 @@
 
 /* Glassmorphism Design System */
 .glass-panel {
-    background: rgba(255, 255, 255, 0.75);
+    background: rgba(10, 15, 29, 0.75);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .glass-navbar {
-    background: rgba(255, 255, 255, 0.75);
+    background: rgba(10, 15, 29, 0.75);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .glass-sidebar {
-    background: rgba(15, 23, 42, 0.94);
+    background: rgba(10, 15, 29, 0.94);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Micro-Animations and Transitions */

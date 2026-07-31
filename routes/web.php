@@ -101,6 +101,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     // Monitoring Admin
     Route::get('/monitoring/kunjungan', [AdminMonitoringController::class, 'kunjungan'])->name('monitoring.kunjungan');
+    Route::get('/monitoring/kunjungan/pdf', [AdminMonitoringController::class, 'exportKunjunganPdf'])->name('monitoring.kunjungan.pdf');
     Route::get('/monitoring/verifikasi', [AdminMonitoringController::class, 'verifikasi'])->name('monitoring.verifikasi');
     
     // Pengumuman
@@ -109,6 +110,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Rekap Absensi
     Route::get('/rekap-absensi', [RekapAbsensiController::class, 'index'])->name('rekap-absensi.index');
     Route::get('/rekap-absensi/export', [RekapAbsensiController::class, 'export'])->name('rekap-absensi.export');
+    Route::get('/rekap-absensi/export-pdf', [RekapAbsensiController::class, 'exportPdf'])->name('rekap-absensi.export-pdf');
 
     // Kelola & Hapus Absensi
     Route::get('/absensi', [AdminAbsensiController::class, 'index'])->name('absensi.index');

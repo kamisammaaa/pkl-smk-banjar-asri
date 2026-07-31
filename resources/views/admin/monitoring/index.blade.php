@@ -3,9 +3,9 @@
 <div class="max-w-6xl mx-auto px-4 py-6">
     <h2 class="text-2xl font-bold mb-6">👁️ Monitoring Kunjungan Pembimbing</h2>
     
-    <div class="bg-white rounded shadow overflow-x-auto">
+    <div class="glass-panel rounded shadow overflow-x-auto">
         <table class="w-full text-left text-sm">
-            <thead class="bg-gray-50"><tr><th class="p-3">Tanggal</th><th class="p-3">Pembimbing</th><th class="p-3">Siswa</th><th class="p-3">Perusahaan</th><th class="p-3">Catatan</th><th class="p-3">Foto</th></tr></thead>
+            <thead class="glass-panel/5"><tr><th class="p-3">Tanggal</th><th class="p-3">Pembimbing</th><th class="p-3">Siswa</th><th class="p-3">Perusahaan</th><th class="p-3">Catatan</th><th class="p-3">Foto</th></tr></thead>
             <tbody>
                 @forelse($kunjungans as $k)
                 <tr class="border-t">
@@ -36,7 +36,7 @@
                     <td class="p-3">{{ $k->foto ? '📷 Ada' : '-' }}</td>
                 </tr>
                 @empty
-                <tr><td colspan="6" class="p-4 text-center text-gray-500">Belum ada data kunjungan</td></tr>
+                <tr><td colspan="6" class="p-4 text-center text-gray-400">Belum ada data kunjungan</td></tr>
                 @endforelse
             </tbody>
         </table>
